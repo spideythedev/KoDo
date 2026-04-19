@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KoDo Workspace | JavaScript</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        kodo: { base: '#050505', surface: '#0f0f0f', border: '#222222', accent: '#eab308' } // Yellow accent for JS
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        .monaco-editor-container { border-radius: 0.5rem; overflow: hidden; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
+</head>
+<body class="bg-kodo-base text-gray-300 font-sans antialiased h-screen flex flex-col overflow-hidden">
+
+    <nav class="h-14 border-b border-kodo-border bg-kodo-base flex items-center justify-between px-4 shrink-0">
+        <div class="flex items-center gap-4">
+            <a href="../index.html" class="text-gray-500 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </a>
+            <div class="flex items-center gap-2">
+                <span class="text-xl">⚡</span>
+                <h1 class="text-sm font-bold text-white tracking-wide">JavaScript Engine <span class="text-gray-500 font-normal">/ Asynchronous Logic</span></h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="px-2 py-1 text-xs font-mono text-yellow-400 bg-yellow-400/10 rounded border border-yellow-400/20">Module 04</span>
+            <button class="bg-kodo-surface border border-kodo-border hover:border-white text-xs px-4 py-1.5 rounded transition-colors text-white">Ask AI Coach</button>
+        </div>
+    </nav>
+
+    <main class="flex flex-1 overflow-hidden">
+        
+        <aside class="w-64 border-r border-kodo-border bg-kodo-surface/50 overflow-y-auto hidden md:block shrink-0 p-4">
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Curriculum</h3>
+            <ul class="space-y-1">
+                <li><a href="#" class="block px-3 py-2 text-sm text-gray-400 hover:text-white rounded hover:bg-kodo-border transition-colors">1. The V8 Engine</a></li>
+                <li><a href="#" class="block px-3 py-2 text-sm text-gray-400 hover:text-white rounded hover:bg-kodo-border transition-colors">2. Execution Context</a></li>
+                <li><a href="#" class="block px-3 py-2 text-sm text-gray-400 hover:text-white rounded hover:bg-kodo-border transition-colors">3. Closures & Scope</a></li>
+                <li>
+                    <a href="#" class="block px-3 py-2 text-sm text-yellow-400 bg-yellow-400/10 rounded border border-yellow-400/20 font-medium">4. Asynchronous Logic</a>
+                </li>
+                <li><a href="#" class="block px-3 py-2 text-sm text-gray-600 cursor-not-allowed flex items-center justify-between">5. Promises & Fetch <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"/></svg></a></li>
+            </ul>
+        </aside>
+
+        <section class="flex-1 overflow-y-auto p-6 md:p-10 border-r border-kodo-border relative">
+            <div class="max-w-2xl mx-auto">
+                <h2 class="text-3xl font-extrabold text-white mb-4">The Event Loop</h2>
+                <p class="text-gray-400 mb-6 leading-relaxed">
+                    JavaScript is strictly <strong>single-threaded</strong>. It can only execute one piece of code at a time on its main thread. So how does it handle complex tasks like fetching database records without freezing the entire application? It uses the <strong>Event Loop</strong>.
+                </p>
+
+                <div class="my-8">
+                    
+                </div>
+
+                <h3 class="text-xl font-bold text-white mt-8 mb-3">Micro vs Macro Tasks</h3>
+                <p class="text-gray-400 mb-4 leading-relaxed">
+                    When you run asynchronous code, it doesn't execute immediately. It gets pushed to a waiting area. Promises (like <code>fetch</code>) go to the high-priority <strong>Microtask Queue</strong>, while functions like <code>setTimeout</code> go to the lower-priority <strong>Macrotask Queue</strong>.
+                </p>
+                
+                <div class="bg-kodo-surface border border-kodo-border rounded-lg p-5 mt-6 border-l-4 border-l-yellow-400">
+                    <h4 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Your Mission
+                    </h4>
+                    <p class="text-sm text-gray-400">
+                        In the editor, we are simulating a database query to a Jujutsu Sorcerer registry. Look at the code. Before you click run, try to guess the exact order the <code>console.log</code> statements will print out based on what you know about the Call Stack and Event Loop.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="w-full md:w-[45%] flex flex-col bg-[#1e1e1e] shrink-0">
+            <div class="h-10 bg-[#252526] border-b border-[#333] flex items-center justify-between px-4">
+                <span class="text-xs font-mono text-gray-400">async_mission.js</span>
+                <button id="run-btn" class="bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-bold px-4 py-1 rounded transition-colors flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Run Code
+                </button>
+            </div>
+            
+            <div id="editor" class="flex-1 w-full"></div>
+
+            <div class="h-64 bg-[#0f0f0f] border-t border-[#333] flex flex-col shrink-0">
+                <div class="h-8 bg-[#181818] border-b border-[#333] flex items-center px-4">
+                    <span class="text-xs font-mono text-gray-500">TERMINAL OUTPUT</span>
+                </div>
+                <div id="console-output" class="flex-1 p-4 font-mono text-xs text-gray-300 overflow-y-auto space-y-1">
+                    <div class="text-gray-600 italic">Waiting for execution...</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- 1. Setup Monaco Editor ---
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            
+            const defaultCode = `console.log("1. Requesting Jujutsu High Registry...");
+
+setTimeout(() => {
+    console.log("4. [Macro-task] Backup database synced.");
+}, 0);
+
+Promise.resolve().then(() => {
+    console.log("3. [Micro-task] Sorcerer Grade: Special Grade.");
+});
+
+console.log("2. Analyzing Cursed Energy levels...");`;
+
+            window.editor = monaco.editor.create(document.getElementById('editor'), {
+                value: defaultCode,
+                language: 'javascript',
+                theme: 'vs-dark',
+                minimap: { enabled: false },
+                fontSize: 14,
+                fontFamily: "'JetBrains Mono', monospace",
+                lineHeight: 24,
+                padding: { top: 16 },
+                scrollBeyondLastLine: false,
+                smoothScrolling: true,
+                cursorBlinking: "smooth",
+                roundedSelection: false
+            });
+        });
+
+        // --- 2. Custom Console Output Capture ---
+        const runBtn = document.getElementById('run-btn');
+        const consoleDiv = document.getElementById('console-output');
+
+        function appendToConsole(msg, type = 'log') {
+            const el = document.createElement('div');
+            el.className = type === 'error' ? 'text-red-400' : (type === 'warn' ? 'text-yellow-400' : 'text-green-400');
+            el.innerHTML = `<span class="text-gray-600 mr-2">></span> ${msg}`;
+            consoleDiv.appendChild(el);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight; // Auto-scroll
+        }
+
+        runBtn.addEventListener('click', () => {
+            if(!window.editor) return;
+            
+            // Clear previous output
+            consoleDiv.innerHTML = '';
+            runBtn.innerHTML = `<svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Executing...`;
+            
+            const code = window.editor.getValue();
+
+            // Intercept console.log safely for the evaluation context
+            const originalLog = console.log;
+            const originalError = console.error;
+            
+            let logs = [];
+            console.log = (...args) => { logs.push({ type: 'log', msg: args.join(' ') }); originalLog(...args); };
+            console.error = (...args) => { logs.push({ type: 'error', msg: args.join(' ') }); originalError(...args); };
+
+            try {
+                // Execute code in a scoped context
+                new Function(code)();
+                
+                // Allow microtasks (Promises) to resolve before rendering output
+                setTimeout(() => {
+                    logs.forEach(l => appendToConsole(l.msg, l.type));
+                    if(logs.length === 0) appendToConsole("Code executed successfully with no output.", 'log');
+                    resetBtn();
+                }, 50);
+
+            } catch (err) {
+                appendToConsole(err.message, 'error');
+                resetBtn();
+            }
+
+            // Restore native console functionality
+            console.log = originalLog;
+            console.error = originalError;
+        });
+
+        function resetBtn() {
+            runBtn.innerHTML = `<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Run Code`;
+        }
+    </script>
+</body>
+</html>
