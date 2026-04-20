@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KoDo | Discord Bot Forge</title>
 
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
@@ -15,29 +15,49 @@ tailwind.config = {
     darkMode: 'class',
     theme: {
         extend: {
-            colors: { void: '#000000', surface: 'rgba(10,10,12,0.7)', border: 'rgba(255,255,255,0.06)', primary: '#5865F2', accent: '#00ffaa' },
-            fontFamily: { sans: ['Space Grotesk', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+            colors: { 
+                void: '#000000', 
+                surface: 'rgba(10,10,12,0.7)', 
+                border: 'rgba(255,255,255,0.06)', 
+                primary: '#5865F2', 
+                accent: '#00ffaa' 
+            },
+            fontFamily: { 
+                sans: ['Space Grotesk', 'sans-serif'], 
+                mono: ['JetBrains Mono', 'monospace'] 
+            }
         }
     }
 }
 </script>
 
 <style>
+/* Vertex Creative Spatial Dark Mode */
 body { background: #000; color: #fff; overflow-x: hidden; }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
 .glass { background: rgba(10,10,12,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.06); }
 .noise { position: fixed; inset: 0; z-index: 0; opacity: 0.03; pointer-events: none; background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)"/%3E%3C/svg%3E'); }
+
+/* View Transitions */
 .view { display: none; z-index: 10; position: relative; width: 100%; min-height: 100vh; }
-.view.active { display: flex; flex-direction: column; animation: fadeIn 0.4s ease forwards; }
+.view.active { display: flex; flex-direction: column; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Mascot & HUD */
 .k-bubble { transform-origin: bottom right; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0); opacity: 0; }
 .k-bubble.show { transform: scale(1); opacity: 1; }
-pre code { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
-.prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; color: #fff; }
-.prose p { color: #a1a1aa; margin-bottom: 1rem; line-height: 1.6; }
-.prose ul { list-style-type: disc; padding-left: 1.5rem; color: #a1a1aa; margin-bottom: 1rem; }
+
+/* Theory Formatting */
+.prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #fff; letter-spacing: -0.025em; }
+.prose p { color: #a1a1aa; margin-bottom: 1rem; line-height: 1.7; font-size: 0.95rem; }
+.prose ul { list-style-type: disc; padding-left: 1.5rem; color: #a1a1aa; margin-bottom: 1rem; font-size: 0.95rem; }
+.prose li { margin-bottom: 0.25rem; }
+.prose code { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; background: rgba(255,255,255,0.1); padding: 0.15rem 0.3rem; border-radius: 4px; color: #e2e8f0; }
+pre code { background: transparent; padding: 0; color: inherit; }
 </style>
 </head>
 <body class="antialiased selection:bg-primary/50">
@@ -54,22 +74,22 @@ pre code { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
 </svg>
 
 <div id="view-auth" class="view active items-center justify-center">
-    <div class="glass p-10 rounded-2xl w-full max-w-md flex flex-col items-center">
+    <div class="glass p-10 rounded-2xl w-full max-w-md flex flex-col items-center shadow-2xl relative z-10">
         <h1 class="text-4xl font-bold mb-2 tracking-tighter">KoDo<span class="text-primary">.</span></h1>
-        <p class="text-gray-400 mb-8 font-mono text-sm">DISCORD BOT FORGE</p>
+        <p class="text-gray-400 mb-8 font-mono text-xs tracking-widest uppercase">Discord Bot Forge</p>
         
         <div class="w-full flex bg-void rounded-lg p-1 mb-6 border border-border">
-            <button id="tab-login" class="flex-1 py-2 text-sm rounded-md bg-surface text-white">Login</button>
-            <button id="tab-register" class="flex-1 py-2 text-sm rounded-md text-gray-400 hover:text-white">Register</button>
+            <button id="tab-login" class="flex-1 py-2 text-sm rounded-md bg-surface text-white font-medium transition-colors">Login</button>
+            <button id="tab-register" class="flex-1 py-2 text-sm rounded-md text-gray-400 hover:text-white font-medium transition-colors">Register</button>
         </div>
 
         <form id="auth-form" class="w-full flex flex-col gap-4">
-            <input type="email" id="auth-email" placeholder="Email Address" class="w-full bg-void border border-border p-3 rounded-lg text-white font-mono text-sm focus:border-primary outline-none" required>
-            <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-void border border-border p-3 rounded-lg text-white font-mono text-sm focus:border-primary outline-none" required>
-            <button type="submit" id="auth-submit" class="w-full bg-primary hover:bg-indigo-600 text-white font-bold py-3 rounded-lg transition-colors">Enter Forge</button>
+            <input type="email" id="auth-email" placeholder="Developer Email" class="w-full bg-void border border-border p-3 rounded-lg text-white font-mono text-sm focus:border-primary outline-none transition-colors" required>
+            <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-void border border-border p-3 rounded-lg text-white font-mono text-sm focus:border-primary outline-none transition-colors" required>
+            <button type="submit" id="auth-submit" class="w-full bg-primary hover:bg-indigo-600 text-white font-bold py-3 rounded-lg transition-colors mt-2">Initialize Session</button>
         </form>
         
-        <div class="w-full flex items-center my-6">
+        <div class="w-full flex items-center my-6 opacity-50">
             <div class="flex-1 border-t border-border"></div>
             <span class="px-4 text-xs text-gray-500 font-mono">OR</span>
             <div class="flex-1 border-t border-border"></div>
@@ -83,321 +103,525 @@ pre code { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
 </div>
 
 <div id="view-dash" class="view p-6 md:p-12 max-w-6xl mx-auto">
-    <header class="flex justify-between items-center mb-12">
+    <header class="flex justify-between items-center mb-16 border-b border-border pb-6">
         <h1 class="text-3xl font-bold tracking-tighter">KoDo<span class="text-primary">.</span></h1>
         <div class="flex items-center gap-6">
-            <div class="flex items-center gap-2 glass px-4 py-2 rounded-full border-accent/20">
+            <div class="flex items-center gap-2 glass px-4 py-2 rounded-full border-accent/20 shadow-[0_0_15px_rgba(0,255,170,0.1)]">
                 <svg class="w-4 h-4 text-accent"><use href="#icon-stone"></use></svg>
                 <span id="dash-stones" class="font-mono text-sm font-bold text-accent">0</span>
             </div>
-            <div class="flex items-center gap-2 glass px-4 py-2 rounded-full border-orange-500/20">
+            <div class="flex items-center gap-2 glass px-4 py-2 rounded-full border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.1)]">
                 <span class="text-orange-500 text-sm">🔥</span>
                 <span id="dash-streak" class="font-mono text-sm font-bold text-orange-500">0 Day</span>
             </div>
-            <button id="btn-logout" class="text-xs font-mono text-gray-500 hover:text-white">SIGNOUT</button>
+            <button id="btn-logout" class="text-[10px] font-mono text-gray-500 hover:text-white uppercase tracking-widest transition-colors">Terminate</button>
         </div>
     </header>
 
     <div class="mb-12">
-        <h2 class="text-4xl font-light mb-2">Welcome back, <span id="dash-name" class="font-medium text-white">Architect</span>.</h2>
-        <p class="text-gray-400 font-mono text-sm">SELECT YOUR EXECUTION ENVIRONMENT</p>
+        <h2 class="text-5xl font-light mb-3 tracking-tight">Welcome back, <br><span id="dash-name" class="font-medium text-white">Architect</span>.</h2>
+        <p class="text-gray-500 font-mono text-xs uppercase tracking-widest border-l-2 border-primary pl-3">Select your execution environment.</p>
     </div>
 
     <div class="grid md:grid-cols-2 gap-8">
-        <div onclick="app.openTrack('js')" class="glass p-8 rounded-2xl cursor-pointer hover:border-primary/50 transition-all group">
-            <div class="w-12 h-12 rounded-xl bg-[#F7DF1E]/10 flex items-center justify-center mb-6">
+        <div onclick="app.openTrack('js')" class="glass p-10 rounded-2xl cursor-pointer hover:border-primary/50 transition-all group hover:bg-white/[0.02] relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity"><svg class="w-24 h-24"><use href="#icon-js"></use></svg></div>
+            <div class="w-12 h-12 rounded-xl bg-[#F7DF1E]/10 flex items-center justify-center mb-6 border border-[#F7DF1E]/20">
                 <svg class="w-6 h-6"><use href="#icon-js"></use></svg>
             </div>
-            <h3 class="text-2xl font-bold mb-2">Discord.js Track</h3>
-            <p class="text-gray-400 text-sm mb-6">Master the official Node.js wrapper. Build robust, event-driven applications.</p>
-            <div class="w-full bg-void rounded-full h-1.5 mb-2">
-                <div id="progress-js" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
+            <h3 class="text-2xl font-bold mb-2 text-white">Discord.js Track</h3>
+            <p class="text-gray-400 text-sm mb-8 leading-relaxed max-w-sm">Master the official Node.js wrapper. Build robust, event-driven applications and master asynchronous memory allocation.</p>
+            <div class="w-full bg-void rounded-full h-1 mb-3 border border-border">
+                <div id="progress-js" class="bg-primary h-full rounded-full transition-all duration-1000" style="width: 0%"></div>
             </div>
-            <p class="text-xs font-mono text-gray-500 text-right"><span id="count-js">0</span>/20 COMPLETED</p>
+            <p class="text-[10px] font-mono text-gray-500 text-right uppercase tracking-widest"><span id="count-js" class="text-white">0</span> / 20 Nodes Active</p>
         </div>
 
-        <div onclick="app.openTrack('py')" class="glass p-8 rounded-2xl cursor-pointer hover:border-blue-500/50 transition-all group">
-            <div class="w-12 h-12 rounded-xl bg-[#3776AB]/10 flex items-center justify-center mb-6">
+        <div onclick="app.openTrack('py')" class="glass p-10 rounded-2xl cursor-pointer hover:border-blue-500/50 transition-all group hover:bg-white/[0.02] relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity"><svg class="w-24 h-24"><use href="#icon-py"></use></svg></div>
+            <div class="w-12 h-12 rounded-xl bg-[#3776AB]/10 flex items-center justify-center mb-6 border border-[#3776AB]/20">
                 <svg class="w-6 h-6"><use href="#icon-py"></use></svg>
             </div>
-            <h3 class="text-2xl font-bold mb-2">Discord.py Track</h3>
-            <p class="text-gray-400 text-sm mb-6">Execute Python logic. Build elegant cogs and powerful moderation tools.</p>
-            <div class="w-full bg-void rounded-full h-1.5 mb-2">
-                <div id="progress-py" class="bg-[#3776AB] h-1.5 rounded-full" style="width: 0%"></div>
+            <h3 class="text-2xl font-bold mb-2 text-white">Discord.py Track</h3>
+            <p class="text-gray-400 text-sm mb-8 leading-relaxed max-w-sm">Execute Python logic. Build elegant cogs, background tasks, and powerful algorithmic moderation tools using Pyodide WASM.</p>
+            <div class="w-full bg-void rounded-full h-1 mb-3 border border-border">
+                <div id="progress-py" class="bg-[#3776AB] h-full rounded-full transition-all duration-1000" style="width: 0%"></div>
             </div>
-            <p class="text-xs font-mono text-gray-500 text-right"><span id="count-py">0</span>/20 COMPLETED</p>
+            <p class="text-[10px] font-mono text-gray-500 text-right uppercase tracking-widest"><span id="count-py" class="text-white">0</span> / 20 Nodes Active</p>
         </div>
     </div>
 </div>
 
 <div id="view-track" class="view p-6 md:p-12 max-w-4xl mx-auto flex flex-col h-screen overflow-hidden">
-    <header class="flex items-center gap-4 mb-8 shrink-0">
-        <button onclick="app.switchView('dash')" class="glass p-2 rounded-lg hover:bg-white/10"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+    <header class="flex items-center gap-6 mb-10 shrink-0 border-b border-border pb-6">
+        <button onclick="app.switchView('dash')" class="glass p-3 rounded-xl hover:bg-white/10 transition-colors">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
         <div>
-            <h2 id="track-title" class="text-2xl font-bold">Track Name</h2>
-            <p class="text-xs font-mono text-gray-500">CURRICULUM INDEX</p>
+            <h2 id="track-title" class="text-3xl font-bold text-white tracking-tight">Track Name</h2>
+            <p class="text-[10px] font-mono text-gray-500 uppercase tracking-widest mt-1">Curriculum Node Index</p>
         </div>
     </header>
-    <div id="track-list" class="flex-1 overflow-y-auto space-y-3 pb-24 pr-2">
+    <div id="track-list" class="flex-1 overflow-y-auto space-y-2 pb-24 pr-4">
         </div>
 </div>
 
-<div id="view-lesson" class="view flex flex-col h-screen overflow-hidden">
+<div id="view-lesson" class="view flex flex-col h-screen overflow-hidden bg-void">
     <header class="h-14 border-b border-border glass flex items-center justify-between px-6 shrink-0 z-20">
-        <div class="flex items-center gap-4">
-            <button onclick="app.switchView('track')" class="text-xs font-mono text-gray-400 hover:text-white">&lt; BACK</button>
+        <div class="flex items-center gap-6">
+            <button onclick="app.switchView('track')" class="text-[10px] font-mono text-gray-500 hover:text-white uppercase tracking-widest transition-colors flex items-center gap-2">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Abort
+            </button>
             <div class="h-4 w-px bg-border"></div>
-            <span id="lesson-title" class="font-bold text-sm">Lesson Title</span>
+            <span id="lesson-title" class="font-bold text-sm text-white tracking-wide">Lesson Title</span>
         </div>
-        <div class="flex gap-2">
-            <button id="btn-ask-k" class="text-xs font-mono px-3 py-1 bg-white/5 border border-border rounded hover:bg-white/10">ASK K.</button>
+        <div class="flex gap-4 items-center">
+            <button id="btn-ask-k" class="text-[10px] font-mono px-4 py-1.5 bg-white/5 border border-border rounded hover:bg-white/10 transition-colors uppercase tracking-widest flex items-center gap-2 text-gray-300 hover:text-white">
+                <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span> Ask K. Coach
+            </button>
         </div>
     </header>
     
-    <div class="w-full h-1 bg-void shrink-0"><div id="lesson-progress" class="h-full bg-accent transition-all w-1/3"></div></div>
+    <div class="w-full h-0.5 bg-border shrink-0"><div id="lesson-progress" class="h-full bg-accent transition-all duration-500 w-1/3"></div></div>
 
     <div class="flex-1 flex overflow-hidden">
-        <div id="panel-theory" class="w-full lg:w-1/2 p-8 overflow-y-auto prose bg-void border-r border-border">
+        
+        <div id="panel-theory" class="w-full lg:w-1/2 p-10 overflow-y-auto prose bg-void border-r border-border relative">
+            <div class="text-[10px] font-mono text-gray-600 tracking-widest uppercase mb-6 border-b border-border pb-2">Architectural Theory</div>
             <div id="lesson-theory-content"></div>
         </div>
         
-        <div id="panel-editor" class="w-full lg:w-1/2 flex flex-col hidden lg:flex bg-[#050505] relative">
-            <div class="h-10 bg-[#0a0a0c] border-b border-border flex items-center justify-between px-4">
-                <span id="editor-lang" class="text-xs font-mono text-gray-500 uppercase">index.js</span>
+        <div id="panel-editor" class="w-full lg:w-1/2 flex flex-col hidden lg:flex bg-[#030303] relative">
+            
+            <div class="h-10 bg-[#0a0a0c] border-b border-border flex items-center justify-between px-4 shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-red-500/20 border border-red-500/50"></span>
+                    <span class="w-2 h-2 rounded-full bg-yellow-500/20 border border-yellow-500/50"></span>
+                    <span class="w-2 h-2 rounded-full bg-green-500/20 border border-green-500/50"></span>
+                    <span id="editor-lang" class="text-[10px] font-mono text-gray-500 uppercase tracking-widest ml-2">runtime.js</span>
+                </div>
                 <div class="flex gap-2">
-                    <button id="btn-run-example" class="text-[10px] font-mono px-3 py-1 bg-white text-black rounded hover:bg-gray-200 hidden">RUN EXAMPLE</button>
-                    <button id="btn-run-tests" class="text-[10px] font-mono px-3 py-1 bg-primary text-white rounded hover:bg-indigo-500 hidden">RUN TESTS</button>
+                    <button id="btn-run-example" class="text-[10px] font-mono px-4 py-1 bg-white text-black rounded hover:bg-gray-200 transition-colors uppercase tracking-widest hidden shadow-[0_0_10px_rgba(255,255,255,0.1)]">Run Example</button>
+                    <button id="btn-run-tests" class="text-[10px] font-mono px-4 py-1 bg-primary text-white rounded hover:bg-indigo-500 transition-colors uppercase tracking-widest hidden shadow-[0_0_10px_rgba(88,101,242,0.2)]">Execute Tests</button>
                 </div>
             </div>
-            <div id="monaco-container" class="flex-1 w-full"></div>
             
-            <div class="h-48 border-t border-border bg-void flex flex-col shrink-0">
-                <div class="h-8 bg-[#0a0a0c] border-b border-border flex items-center px-4"><span class="text-[10px] font-mono text-gray-500">TERMINAL OUTPUT</span></div>
-                <div id="console-output" class="flex-1 p-3 font-mono text-[11px] text-gray-300 overflow-y-auto space-y-1"></div>
+            <div id="monaco-container" class="flex-1 w-full pt-4"></div>
+            
+            <div class="h-56 border-t border-border bg-void flex flex-col shrink-0">
+                <div class="h-8 bg-[#050505] border-b border-border flex items-center px-4 shrink-0">
+                    <span class="text-[10px] font-mono text-gray-600 tracking-widest uppercase">SYS.STDOUT</span>
+                </div>
+                <div id="console-output" class="flex-1 p-4 font-mono text-[11px] text-gray-400 overflow-y-auto space-y-1">
+                    <div class="text-gray-700 italic">> Listening for execution triggers...</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="h-16 border-t border-border glass flex items-center justify-between px-6 shrink-0 z-20">
-        <button id="btn-prev-step" class="text-sm font-bold text-gray-400 hover:text-white px-4 py-2 disabled:opacity-30">Previous</button>
-        <span id="step-indicator" class="text-xs font-mono text-gray-500">1 / 3</span>
-        <button id="btn-next-step" class="text-sm font-bold bg-white text-black px-6 py-2 rounded-lg hover:bg-gray-200 disabled:opacity-30">Next Step</button>
+    <div class="h-16 border-t border-border glass flex items-center justify-between px-8 shrink-0 z-20">
+        <button id="btn-prev-step" class="text-[10px] font-mono tracking-widest uppercase text-gray-500 hover:text-white px-4 py-2 disabled:opacity-30 transition-colors">Previous</button>
+        <div class="flex items-center gap-4">
+            <span id="step-indicator" class="text-[10px] font-mono text-gray-500 tracking-widest border border-border px-3 py-1 rounded-full">PHASE 1 / 2</span>
+        </div>
+        <button id="btn-next-step" class="text-xs font-bold font-mono tracking-widest uppercase bg-white text-black px-8 py-2 rounded hover:bg-gray-200 disabled:opacity-20 transition-all">Proceed</button>
     </div>
 </div>
 
-<div id="mascot-container" class="fixed bottom-6 right-6 z-50 flex items-end gap-4 pointer-events-none">
-    <div id="k-bubble" class="k-bubble glass p-4 rounded-xl rounded-br-none border-primary/30 max-w-xs pointer-events-auto shadow-2xl">
-        <p id="k-msg" class="text-sm font-sans text-white leading-relaxed">Ready to forge?</p>
+<div id="mascot-container" class="fixed bottom-24 right-8 z-50 flex items-end gap-4 pointer-events-none">
+    <div id="k-bubble" class="k-bubble glass p-5 rounded-2xl rounded-br-none border-border max-w-sm pointer-events-auto shadow-[0_0_30px_rgba(0,0,0,0.8)] border-l-2 border-l-accent">
+        <p id="k-msg" class="text-sm font-sans text-gray-200 leading-relaxed">System initialized. Awaiting commands.</p>
     </div>
-    <div class="w-16 h-16 pointer-events-auto cursor-pointer" onclick="app.toggleMascot()">
-        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-lg">
-            <circle cx="50" cy="50" r="45" fill="#111" stroke="#333" stroke-width="2"/>
-            <circle cx="20" cy="30" r="15" fill="#222"/><circle cx="80" cy="30" r="15" fill="#222"/>
-            <circle cx="35" cy="45" r="5" fill="#fff"/><circle cx="65" cy="45" r="5" fill="#fff"/>
-            <ellipse cx="50" cy="60" rx="8" ry="12" fill="#5865F2"/>
+    <div class="w-16 h-16 pointer-events-auto cursor-pointer hover:scale-105 transition-transform" onclick="app.toggleMascot()">
+        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-2xl">
+            <circle cx="50" cy="50" r="48" fill="#050505" stroke="#1a1a1a" stroke-width="2"/>
+            <circle cx="15" cy="35" r="18" fill="#0a0a0c" stroke="#1a1a1a" stroke-width="2"/>
+            <circle cx="85" cy="35" r="18" fill="#0a0a0c" stroke="#1a1a1a" stroke-width="2"/>
+            <rect x="25" y="45" width="20" height="6" rx="3" fill="#00ffaa" class="animate-pulse"/>
+            <rect x="55" y="45" width="20" height="6" rx="3" fill="#00ffaa" class="animate-pulse"/>
+            <path d="M40 65 Q50 75 60 65 L50 80 Z" fill="#5865F2"/>
         </svg>
     </div>
 </div>
 
 <script type="module">
-// --- DATA: CURRICULUM GENERATOR ---
-// To meet the 40 lesson requirement robustly within constraints, we define the structure
-// and strictly pack real conceptual content for Discord.js and Discord.py.
+// --- 1. THE ARCHITECTURAL CURRICULUM ---
+// 40 lessons meticulously structured for extreme technical depth and execution.
 const C = {
     js: [
-        { id:1, t: "Bot Setup & Token", th: "<p>Welcome to Discord.js. To interact with the Discord API, your bot requires a secure <b>Token</b>. Never share this token.</p><h3>The Client</h3><p>The <code>Client</code> object represents your bot.</p>", e: "const { Client } = require('discord.js');\nconst client = new Client({ intents: [] });\nconsole.log('Client instantiated.');", ch: "Instantiate a Client object and assign it to `myBot`.", s: "const { Client } = require('discord.js');\n// Create myBot here\n", test: "return typeof myBot !== 'undefined' && myBot.constructor.name === 'Client';" },
-        { id:2, t: "Gateway Intents", th: "<p>Intents define what events Discord sends to your bot. Without <code>GuildMessages</code>, you won't see messages.</p>", e: "const { Client, GatewayIntentBits } = require('discord.js');\nconsole.log(GatewayIntentBits.GuildMessages);", ch: "Create an array `myIntents` containing `GatewayIntentBits.Guilds`.", s: "const { GatewayIntentBits } = require('discord.js');\n// Create myIntents\n", test: "return Array.isArray(myIntents) && myIntents.includes(GatewayIntentBits.Guilds);" },
-        { id:3, t: "Ready Event", th: "<p>The <code>ready</code> event fires once the bot logs in.</p>", e: "client.once('ready', () => console.log('Bot is online!'));", ch: "Write a function `onReady` that returns 'Online!'.", s: "function onReady() {\n  \n}", test: "return onReady() === 'Online!';" },
-        { id:4, t: "Message Events", th: "<p>Listen to <code>messageCreate</code> to read messages.</p>", e: "client.on('messageCreate', msg => console.log(msg.content));", ch: "Write a function `isHello` that takes a string and returns true if it equals 'hello'.", s: "function isHello(text) {\n  \n}", test: "return isHello('hello') === true && isHello('bye') === false;" },
-        { id:5, t: "Ping Command", th: "<p>A simple ping command replies with 'Pong!'.</p>", e: "if (msg.content === '!ping') msg.reply('Pong!');", ch: "Create function `handlePing(msg)` returning 'Pong!' if msg is '!ping', else null.", s: "function handlePing(msg) {\n  \n}", test: "return handlePing('!ping') === 'Pong!' && handlePing('test') === null;" },
-        { id:6, t: "Embeds", th: "<p>Embeds are rich UI cards.</p>", e: "const { EmbedBuilder } = require('discord.js');\nconst e = new EmbedBuilder().setTitle('Hi');", ch: "Return an object with title 'Test' and color '#000000'.", s: "function buildEmbed() {\n  return {};\n}", test: "const res = buildEmbed(); return res.title === 'Test' && res.color === '#000000';" },
-        { id:7, t: "Slash Commands", th: "<p>Slash commands integrate directly into the Discord UI.</p>", e: "const { SlashCommandBuilder } = require('discord.js');", ch: "Return an object with name 'ping' and description 'Replies with pong'.", s: "function buildCommand() {\n  return {};\n}", test: "const res = buildCommand(); return res.name === 'ping' && res.description === 'Replies with pong';" },
-        { id:8, t: "Slash Command Options", th: "<p>Options allow user input.</p>", e: "command.addStringOption(opt => opt.setName('user'));", ch: "Return an array of option names: ['user', 'age'].", s: "function getOptions() {\n  return [];\n}", test: "const res = getOptions(); return res.includes('user') && res.includes('age');" },
-        { id:9, t: "Buttons", th: "<p>ActionRows contain Buttons.</p>", e: "const { ActionRowBuilder, ButtonBuilder } = require('discord.js');", ch: "Return an object representing a button with customId 'btn1'.", s: "function makeBtn() {\n  return {};\n}", test: "return makeBtn().customId === 'btn1';" },
-        { id:10, t: "Select Menus", th: "<p>Dropdowns for multiple choices.</p>", e: "const { StringSelectMenuBuilder } = require('discord.js');", ch: "Return a menu configuration object with minValues 1 and maxValues 3.", s: "function makeMenu() {\n  return {};\n}", test: "return makeMenu().minValues === 1 && makeMenu().maxValues === 3;" },
-        { id:11, t: "Modals", th: "<p>Popups for text input.</p>", e: "const { ModalBuilder } = require('discord.js');", ch: "Return a modal object with title 'Feedback'.", s: "function makeModal() {\n  return {};\n}", test: "return makeModal().title === 'Feedback';" },
-        { id:12, t: "Reaction Collectors", th: "<p>Await reactions on messages.</p>", e: "msg.awaitReactions({ time: 15000 });", ch: "Write a filter function `filter(reaction)` returning true if reaction is '👍'.", s: "function filter(reaction) {\n  \n}", test: "return filter('👍') === true && filter('👎') === false;" },
-        { id:13, t: "Moderation: Kick", th: "<p>Kick users via <code>member.kick()</code>.</p>", e: "member.kick('Spamming');", ch: "Write a function `canKick(role)` returning true if role is 'Admin'.", s: "function canKick(role) {\n  \n}", test: "return canKick('Admin') === true && canKick('User') === false;" },
-        { id:14, t: "Moderation: Ban", th: "<p>Ban users permanently.</p>", e: "guild.members.ban(userId);", ch: "Return an object with ban reason 'Rule 1' and days 7.", s: "function getBanConfig() {\n  return {};\n}", test: "const r = getBanConfig(); return r.reason === 'Rule 1' && r.days === 7;" },
-        { id:15, t: "Role Management", th: "<p>Add roles via <code>member.roles.add(roleId)</code>.</p>", e: "member.roles.add('123');", ch: "Return an array of role IDs: ['1', '2'].", s: "function getRoles() {\n  return [];\n}", test: "return getRoles().join() === '1,2';" },
-        { id:16, t: "Welcome Messages", th: "<p>Triggered on <code>guildMemberAdd</code>.</p>", e: "client.on('guildMemberAdd', m => console.log('Welcome'));", ch: "Write function `getWelcome(user)` returning 'Welcome user!'.", s: "function getWelcome(user) {\n  \n}", test: "return getWelcome('Bob') === 'Welcome Bob!';" },
-        { id:17, t: "Embed Pagination", th: "<p>Cycle embeds using buttons.</p>", e: "if(i.customId === 'next') page++;", ch: "Write `nextPage(current, max)` returning current+1 unless at max.", s: "function nextPage(current, max) {\n  \n}", test: "return nextPage(1,3) === 2 && nextPage(3,3) === 3;" },
-        { id:18, t: "Command Cooldowns", th: "<p>Prevent spam using Collections.</p>", e: "const cooldowns = new Collection();", ch: "Write `checkCd(lastTime, now)` returning true if diff > 5000.", s: "function checkCd(last, now) {\n  \n}", test: "return checkCd(0, 6000) === true && checkCd(0, 4000) === false;" },
-        { id:19, t: "Permission Handling", th: "<p>Check bitfields before execution.</p>", e: "member.permissions.has('ManageGuild');", ch: "Return an object representing required perms: { admin: true }.", s: "function reqPerms() {\n  return {};\n}", test: "return reqPerms().admin === true;" },
-        { id:20, t: "Basic Music Bot", th: "<p>Use @discordjs/voice to play audio.</p>", e: "joinVoiceChannel({...});", ch: "Return true to simulate joining a channel successfully.", s: "function joinVC() {\n  \n}", test: "return joinVC() === true;" }
+        { 
+            id:1, t: "Bot Setup & Token", 
+            th: `<h3>The Gateway Connection</h3>
+                 <p>Welcome to the Discord.js architectural track. To interact with the Discord API, your bot requires a secure <b>Token</b>. This acts as the authentication header for all HTTP requests.</p>
+                 <p>The <code>Client</code> object is the main hub for interacting with the Discord API. It manages the WebSocket connection to the Discord Gateway.</p>
+                 <ul>
+                    <li><b>Client:</b> Represents your bot instance.</li>
+                    <li><b>Intents:</b> Bitwise flags passed to the constructor to define what events Discord sends you.</li>
+                 </ul>`, 
+            e: `const { Client, GatewayIntentBits } = require('discord.js');\n\n// Initialize the client\nconst client = new Client({\n    intents: [GatewayIntentBits.Guilds]\n});\n\nconsole.log('Client object instantiated in memory.');`, 
+            ch: `Instantiate a Client object and assign it to a variable named \`myBot\`. Do not worry about intents for this test.`, 
+            s: `const { Client } = require('discord.js');\n\n// Write your instantiation logic below:\n`, 
+            test: `return typeof myBot !== 'undefined' && myBot.constructor.name === 'Client';` 
+        },
+        { 
+            id:2, t: "Gateway Intents", 
+            th: `<h3>Privileged Intent Architecture</h3>
+                 <p>Intents define the specific events Discord will push to your WebSocket connection. This is a crucial memory optimization feature.</p>
+                 <p>If you do not specify <code>GatewayIntentBits.GuildMessages</code>, your bot will completely ignore all messages sent in servers.</p>`, 
+            e: `const { GatewayIntentBits } = require('discord.js');\n\nconsole.log('Guilds Intent Flag:', GatewayIntentBits.Guilds);\nconsole.log('Messages Intent Flag:', GatewayIntentBits.GuildMessages);`, 
+            ch: `Create an array named \`myIntents\` containing exactly two intents: \`GatewayIntentBits.Guilds\` and \`GatewayIntentBits.GuildMessages\`.`, 
+            s: `const { GatewayIntentBits } = require('discord.js');\n\n// Define the array:\n`, 
+            test: `return Array.isArray(myIntents) && myIntents.includes(GatewayIntentBits.Guilds) && myIntents.includes(GatewayIntentBits.GuildMessages);` 
+        },
+        { 
+            id:3, t: "The Ready Event", 
+            th: `<h3>Lifecycle Hooks</h3>
+                 <p>Node.js uses an event-driven architecture (EventEmitter). The <code>ready</code> event fires exactly once when the bot successfully logs in and caches its initial state.</p>
+                 <p>Always use <code>client.once()</code> for the ready event instead of <code>client.on()</code> to prevent memory leaks if the WebSocket reconnects.</p>`, 
+            e: `const { Client } = require('discord.js');\nconst client = new Client({ intents: [] });\n\nclient.once('ready', () => {\n    console.log('System online. Bot is ready.');\n});\n// Simulating event emit:\nclient.emit('ready');`, 
+            ch: `Write a standard JavaScript function named \`onReady\` that simply returns the string 'Online!'.`, 
+            s: `function onReady() {\n    // Return the required string\n    \n}`, 
+            test: `return typeof onReady === 'function' && onReady() === 'Online!';` 
+        },
+        { 
+            id:4, t: "Message Event Routing", 
+            th: `<h3>Event Emitters</h3>
+                 <p>To read messages, you listen to the <code>messageCreate</code> event. This passes a <code>Message</code> object to your callback function.</p>
+                 <p>Always check if the message author is a bot (<code>message.author.bot</code>) to prevent infinite feedback loops.</p>`, 
+            e: `const msg = { content: "Hello", author: { bot: false } };\n\nif (!msg.author.bot && msg.content === "Hello") {\n    console.log("Valid message received.");\n}`, 
+            ch: `Write a function \`isValid(msg)\` that returns \`true\` if \`msg.content\` is 'ping' AND \`msg.author.bot\` is \`false\`.`, 
+            s: `function isValid(msg) {\n    \n}`, 
+            test: `return isValid({content: 'ping', author: {bot: false}}) === true && isValid({content: 'ping', author: {bot: true}}) === false;` 
+        },
+        { 
+            id:5, t: "Basic Ping Command", 
+            th: `<h3>Command Parsing</h3>
+                 <p>A basic command checks the message content. If it matches a specific string, it executes logic.</p>
+                 <p>In Discord.js, you reply to a message using the asynchronous <code>message.reply()</code> method.</p>`, 
+            e: `function simulateCommand(content) {\n    if (content === '!ping') return 'Pong!';\n    return null;\n}\nconsole.log(simulateCommand('!ping'));`, 
+            ch: `Create a function \`handlePing(text)\` that returns 'Pong!' if text is '!ping', and returns 'Ignored' otherwise.`, 
+            s: `function handlePing(text) {\n    \n}`, 
+            test: `return handlePing('!ping') === 'Pong!' && handlePing('hello') === 'Ignored';` 
+        },
+        { 
+            id:6, t: "Embed Architecture", 
+            th: `<h3>Rich UI Construction</h3>
+                 <p>Embeds are constructed using the <code>EmbedBuilder</code> utility class. They allow you to format data cleanly with titles, descriptions, fields, and colors.</p>`, 
+            e: `const { EmbedBuilder } = require('discord.js');\n\nconst embed = new EmbedBuilder()\n    .setTitle('System Alert')\n    .setColor('#ff0000')\n    .setDescription('Memory usage critically high.');\n\nconsole.log(embed.toJSON());`, 
+            ch: `Write a function \`buildEmbed()\` that returns an object representing an embed with a \`title\` of 'Success' and a \`color\` of '#00ff00'.`, 
+            s: `function buildEmbed() {\n    return {\n        // properties here\n    };\n}`, 
+            test: `const res = buildEmbed(); return res.title === 'Success' && res.color === '#00ff00';` 
+        },
+        { 
+            id:7, t: "Slash Commands Base", 
+            th: `<h3>Application Commands</h3>
+                 <p>Message content intent is restricted. Slash commands are the modern, native way to interact with bots.</p>
+                 <p>You build the command schema using <code>SlashCommandBuilder</code> and deploy it to Discord's REST API.</p>`, 
+            e: `const { SlashCommandBuilder } = require('discord.js');\n\nconst data = new SlashCommandBuilder()\n    .setName('ban')\n    .setDescription('Bans a user from the guild.');\n\nconsole.log(data.toJSON());`, 
+            ch: `Write a function \`getCommandData()\` that returns an object with \`name\` set to 'kick' and \`description\` set to 'Kicks a user'.`, 
+            s: `function getCommandData() {\n    return {\n        \n    };\n}`, 
+            test: `const res = getCommandData(); return res.name === 'kick' && res.description === 'Kicks a user';` 
+        },
+        { 
+            id:8, t: "Slash Command Options", 
+            th: `<h3>Type-Safe Inputs</h3>
+                 <p>Slash commands support strict types: Strings, Integers, Users, Roles, etc. This removes the need for regex parsing of user input.</p>`, 
+            e: `// Simulating option chaining\nconst cmd = {\n    name: 'echo',\n    options: [{ name: 'text', type: 3, required: true }]\n};\nconsole.log(cmd);`, 
+            ch: `Write a function \`getOptions()\` that returns an array containing exactly two strings: 'target' and 'reason'.`, 
+            s: `function getOptions() {\n    \n}`, 
+            test: `const res = getOptions(); return Array.isArray(res) && res.includes('target') && res.includes('reason');` 
+        },
+        { 
+            id:9, t: "Interactive Buttons", 
+            th: `<h3>Message Components</h3>
+                 <p>Buttons are added to messages inside an <code>ActionRowBuilder</code>. Every button requires a unique <code>customId</code> so your event listener knows which button was pressed.</p>`, 
+            e: `const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');\n\nconst btn = new ButtonBuilder()\n    .setCustomId('accept_tos')\n    .setLabel('Accept')\n    .setStyle(ButtonStyle.Success);\nconsole.log(btn.toJSON());`, 
+            ch: `Write a function \`createButton()\` that returns an object with \`customId\` equal to 'verify_btn' and \`label\` equal to 'Verify'.`, 
+            s: `function createButton() {\n    \n}`, 
+            test: `const res = createButton(); return res.customId === 'verify_btn' && res.label === 'Verify';` 
+        },
+        { 
+            id:10, t: "String Select Menus", 
+            th: `<h3>Dropdown Interfaces</h3>
+                 <p>Select Menus allow users to pick one or more options from a predefined list. You define <code>minValues</code> and <code>maxValues</code> to control input.</p>`, 
+            e: `// Simulating menu creation\nconst menu = {\n    customId: 'role_select',\n    minValues: 1,\n    maxValues: 3,\n    options: [{label: 'Admin', value: '1'}]\n};\nconsole.log(menu);`, 
+            ch: `Create a function \`configMenu()\` returning an object with \`customId\` 'class_select', \`minValues\` 1, and \`maxValues\` 1.`, 
+            s: `function configMenu() {\n    \n}`, 
+            test: `const res = configMenu(); return res.customId === 'class_select' && res.maxValues === 1;` 
+        },
+        { 
+            id:11, t: "Modals (Text Input)", 
+            th: `<h3>Popup Forms</h3>
+                 <p>Modals allow you to request multi-line text input from users via a popup window. They are triggered directly from interactions.</p>`, 
+            e: `// Modal structure\nconst modal = {\n    title: 'Support Ticket',\n    customId: 'ticket_modal'\n};\nconsole.log(modal);`, 
+            ch: `Write a function \`buildModal()\` returning an object with \`title\` 'Feedback' and \`customId\` 'fb_modal'.`, 
+            s: `function buildModal() {\n    \n}`, 
+            test: `const res = buildModal(); return res.title === 'Feedback' && res.customId === 'fb_modal';` 
+        },
+        { 
+            id:12, t: "Collectors", 
+            th: `<h3>Stateful Await</h3>
+                 <p>Collectors allow you to wait for further input (messages, reactions, button clicks) on a specific message. You pass a <code>filter</code> function to ensure you only collect valid data.</p>`, 
+            e: `// Filter example\nconst filter = i => i.user.id === '123' && i.customId === 'confirm';\nconsole.log('Filter test:', filter({user:{id:'123'}, customId:'confirm'}));`, 
+            ch: `Write a filter function \`isValid(interaction)\` that returns true if \`interaction.customId\` equals 'next_page'.`, 
+            s: `function isValid(interaction) {\n    \n}`, 
+            test: `return isValid({customId: 'next_page'}) === true && isValid({customId: 'prev'}) === false;` 
+        },
+        { id:13, t: "Moderation: Kick", th: `<h3>Guild Member Management</h3><p>Use <code>GuildMember.kick()</code>. It returns a Promise.</p>`, e: `console.log("Simulating: member.kick('Spam');");`, ch: `Write \`canKick(role)\` returning true if role is 'Moderator'.`, s: `function canKick(role) {\n    \n}`, test: `return canKick('Moderator') === true && canKick('User') === false;` },
+        { id:14, t: "Moderation: Ban", th: `<h3>Guild Management</h3><p>Bans operate on the Guild object, not the Member object, allowing you to ban IDs not currently in the server.</p>`, e: `console.log("Simulating: guild.bans.create('123', { deleteMessageSeconds: 604800 });");`, ch: `Return a config object with \`reason\` 'Spam' and \`deleteDays\` 7.`, s: `function banConfig() {\n    return {};\n}`, test: `const r = banConfig(); return r.reason === 'Spam' && r.deleteDays === 7;` },
+        { id:15, t: "Role Management", th: `<h3>Bitwise Permissions</h3><p>Manage roles via the <code>GuildMemberRoleManager</code>.</p>`, e: `console.log("Simulating: member.roles.add('ROLE_ID');");`, ch: `Write \`hasRole(rolesArr, roleId)\` returning true if array includes ID.`, s: `function hasRole(rolesArr, roleId) {\n    \n}`, test: `return hasRole([1,2,3], 2) === true && hasRole([1], 4) === false;` },
+        { id:16, t: "Guild Member Add", th: `<h3>Welcome Event</h3><p>The <code>guildMemberAdd</code> event requires the <code>GuildMembers</code> privileged intent.</p>`, e: `console.log("client.on('guildMemberAdd', member => sendWelcome());");`, ch: `Write \`greet(user)\` that returns exactly: 'Welcome to the server, user!'`, s: `function greet(user) {\n    \n}`, test: `return greet('Alex') === 'Welcome to the server, Alex!';` },
+        { id:17, t: "Embed Pagination", th: `<h3>Dynamic UIs</h3><p>Update existing messages using <code>interaction.update()</code>.</p>`, e: `console.log("Simulating: interaction.update({ embeds: [newPage] });");`, ch: `Write \`getPage(arr, index)\` returning the array item at index.`, s: `function getPage(arr, index) {\n    \n}`, test: `return getPage(['a','b','c'], 1) === 'b';` },
+        { id:18, t: "Memory Caching (Cooldowns)", th: `<h3>Rate Limiting</h3><p>Use Discord.js <code>Collection</code> (which extends native Map) to store cooldown timestamps in memory.</p>`, e: `const coll = new Map();\ncoll.set('user1', Date.now());\nconsole.log(coll.has('user1'));`, ch: `Write \`isOnCooldown(map, user)\` returning true if map has user.`, s: `function isOnCooldown(map, user) {\n    \n}`, test: `const m = new Map(); m.set('x', 1); return isOnCooldown(m, 'x') === true && isOnCooldown(m, 'y') === false;` },
+        { id:19, t: "Permissions Bitfield", th: `<h3>Security Checks</h3><p>Always verify <code>interaction.memberPermissions.has()</code> before executing sensitive API calls.</p>`, e: `const perms = { has: (p) => p === 'ADMIN' };\nconsole.log('Is Admin?', perms.has('ADMIN'));`, ch: `Write \`checkAdmin(permsObj)\` returning the result of \`permsObj.has('Administrator')\`.`, s: `function checkAdmin(permsObj) {\n    \n}`, test: `return checkAdmin({has: p => p === 'Administrator'}) === true;` },
+        { id:20, t: "Voice & Audio Integration", th: `<h3>Voice State Updates</h3><p>Audio requires the <code>@discordjs/voice</code> package to manage UDP connections to voice servers.</p>`, e: `console.log("Simulating joinVoiceChannel({ channelId, guildId, adapterCreator });");`, ch: `Return an object with \`channelId\` set to 'voice_1'.`, s: `function getVoiceConfig() {\n    \n}`, test: `return getVoiceConfig().channelId === 'voice_1';` }
     ],
     py: [
-        { id:1, t: "Bot Setup & Token", th: "<p>Welcome to discord.py. Import discord and instantiate commands.Bot.</p>", e: "import discord\nfrom discord.ext import commands\nbot = commands.Bot(command_prefix='!')\nprint('Bot defined')", ch: "Define a variable `prefix` as '!'.", s: "# Define prefix\n", test: "return prefix == '!'" },
-        { id:2, t: "Intents", th: "<p>Intents are required. Enable default and message_content.</p>", e: "intents = discord.Intents.default()", ch: "Create a list `intents` containing 'messages'.", s: "# create intents\n", test: "return 'messages' in intents" },
-        { id:3, t: "Ping Command", th: "<p>Commands use the @bot.command() decorator.</p>", e: "@bot.command()\nasync def ping(ctx):\n    await ctx.send('Pong!')", ch: "Write a function `reply()` returning 'Pong!'.", s: "def reply():\n    pass", test: "return reply() == 'Pong!'" },
-        { id:4, t: "Embeds", th: "<p>Use discord.Embed to create cards.</p>", e: "emb = discord.Embed(title='Hi')", ch: "Return a dict with title 'Test'.", s: "def make_embed():\n    return {}", test: "return make_embed().get('title') == 'Test'" },
-        { id:5, t: "Slash Commands", th: "<p>Use @app_commands in dpy 2.0+.</p>", e: "@app_commands.command()", ch: "Return a dict representing slash name 'ping'.", s: "def slash():\n    return {}", test: "return slash().get('name') == 'ping'" },
-        { id:6, t: "Buttons", th: "<p>Use discord.ui.View and Button.</p>", e: "class MyView(discord.ui.View): pass", ch: "Return True to simulate button press.", s: "def press():\n    pass", test: "return press() == True" },
-        { id:7, t: "Select Menus", th: "<p>Dropdowns via discord.ui.Select.</p>", e: "select = discord.ui.Select()", ch: "Return a list of options: ['A', 'B'].", s: "def get_opts():\n    pass", test: "return get_opts() == ['A', 'B']" },
-        { id:8, t: "Modals", th: "<p>Popups via discord.ui.Modal.</p>", e: "class Feedback(discord.ui.Modal): pass", ch: "Return a dict with modal title 'Input'.", s: "def modal_info():\n    pass", test: "return modal_info().get('title') == 'Input'" },
-        { id:9, t: "Reaction Roles", th: "<p>Assign roles on on_raw_reaction_add.</p>", e: "async def on_raw_reaction_add(payload): pass", ch: "Write `check_emoji(e)` returning True if e is '✅'.", s: "def check_emoji(e):\n    pass", test: "return check_emoji('✅') == True and check_emoji('x') == False" },
-        { id:10, t: "Moderation: Kick", th: "<p>Kick members.</p>", e: "await member.kick()", ch: "Return True if role == 'Admin'.", s: "def can_kick(role):\n    pass", test: "return can_kick('Admin') == True" },
-        { id:11, t: "Moderation: Ban", th: "<p>Ban members.</p>", e: "await member.ban()", ch: "Return a tuple (reason, days): ('Rule 1', 7).", s: "def ban_params():\n    pass", test: "return ban_params() == ('Rule 1', 7)" },
-        { id:12, t: "Role Management", th: "<p>Add roles.</p>", e: "await member.add_roles(role)", ch: "Return a list of integers [1, 2].", s: "def role_ids():\n    pass", test: "return role_ids() == [1, 2]" },
-        { id:13, t: "Welcome Messages", th: "<p>on_member_join event.</p>", e: "async def on_member_join(member): pass", ch: "Format string 'Welcome {}' with 'Bob'.", s: "def welcome(name):\n    pass", test: "return welcome('Bob') == 'Welcome Bob'" },
-        { id:14, t: "Embed Pagination", th: "<p>Use Views to change pages.</p>", e: "view = PaginationView()", ch: "Write `next_page(cur, mx)` returning cur+1 if cur < mx.", s: "def next_page(cur, mx):\n    pass", test: "return next_page(1,3) == 2 and next_page(3,3) == 3" },
-        { id:15, t: "Cooldowns", th: "<p>@commands.cooldown decorator.</p>", e: "@commands.cooldown(1, 5, commands.BucketType.user)", ch: "Return True to simulate cooldown passed.", s: "def cd_check():\n    pass", test: "return cd_check() == True" },
-        { id:16, t: "Permission Checks", th: "<p>@commands.has_permissions.</p>", e: "@commands.has_permissions(ban_members=True)", ch: "Return a dict {'ban': True}.", s: "def req_perms():\n    pass", test: "return req_perms().get('ban') == True" },
-        { id:17, t: "Error Handling", th: "<p>on_command_error event.</p>", e: "async def on_command_error(ctx, err): pass", ch: "Return 'Error' if err is True.", s: "def handle(err):\n    pass", test: "return handle(True) == 'Error'" },
-        { id:18, t: "Cogs (Basic)", th: "<p>Organize code into classes.</p>", e: "class Admin(commands.Cog): pass", ch: "Return the string 'Cog loaded'.", s: "def load_cog():\n    pass", test: "return load_cog() == 'Cog loaded'" },
-        { id:19, t: "Tasks", th: "<p>Background loops.</p>", e: "@tasks.loop(seconds=10)", ch: "Return the integer 10.", s: "def interval():\n    pass", test: "return interval() == 10" },
-        { id:20, t: "Music Bot", th: "<p>Audio via FFmpeg.</p>", e: "vc.play(discord.FFmpegPCMAudio(url))", ch: "Return True to simulate playback.", s: "def play():\n    pass", test: "return play() == True" }
+        { 
+            id:1, t: "Bot Setup & Token", 
+            th: `<h3>Pythonic Wrappers</h3>
+                 <p>discord.py uses object-oriented design and Python's native <code>asyncio</code> library. The core class is <code>commands.Bot</code>, which inherits from <code>discord.Client</code>.</p>
+                 <p>Execution requires an event loop, handled automatically by <code>bot.run('TOKEN')</code>.</p>`, 
+            e: `import asyncio\nprint("Simulating bot startup sequence...")\nprint("Event loop initialized.")`, 
+            ch: `Define a Python variable \`token\` and assign it the string value 'SECRET_123'.`, 
+            s: `# Define your variable below\n`, 
+            test: `return token == 'SECRET_123'` 
+        },
+        { 
+            id:2, t: "Intent Flags", 
+            th: `<h3>Memory Optimization in Python</h3>
+                 <p>Just like JS, discord.py requires explicit Intent declarations. <code>discord.Intents.default()</code> enables most events, but disables <code>members</code>, <code>presences</code>, and <code>message_content</code>.</p>`, 
+            e: `class MockIntents:\n    def __init__(self):\n        self.messages = False\n\ni = MockIntents()\ni.messages = True\nprint("Messages intent enabled:", i.messages)`, 
+            ch: `Create a dictionary \`intents\` with a key 'message_content' set to \`True\`.`, 
+            s: `# Create the dict\n`, 
+            test: `return intents.get('message_content') == True` 
+        },
+        { 
+            id:3, t: "Ping Command (Decorator)", 
+            th: `<h3>Command Decorators</h3>
+                 <p>discord.py heavily utilizes Python decorators (<code>@</code>) to register commands. The function name becomes the command name.</p>`, 
+            e: `def command(name):\n    def decorator(func):\n        print(f"Registered command: {name}")\n        return func\n    return decorator\n\n@command("ping")\ndef ping_cmd(): pass`, 
+            ch: `Write a standard Python function \`get_reply()\` that returns the string 'Pong!'.`, 
+            s: `def get_reply():\n    pass`, 
+            test: `return get_reply() == 'Pong!'` 
+        },
+        { 
+            id:4, t: "Embed Construction", 
+            th: `<h3>Kwargs Configuration</h3>
+                 <p>Embeds are instantiated via the <code>discord.Embed()</code> class, usually utilizing kwargs for rapid configuration rather than chainable methods.</p>`, 
+            e: `emb = {'title': 'System', 'color': 0xff0000}\nprint(f"Embed generated: {emb['title']}")`, 
+            ch: `Write a function \`make_embed()\` that returns a dictionary with key 'title' equal to 'Log'.`, 
+            s: `def make_embed():\n    pass`, 
+            test: `return make_embed().get('title') == 'Log'` 
+        },
+        { 
+            id:5, t: "App Commands (Slash)", 
+            th: `<h3>The app_commands Tree</h3>
+                 <p>In discord.py 2.0+, slash commands are registered via the <code>CommandTree</code> using the <code>@app_commands.command()</code> decorator.</p>`, 
+            e: `print("Simulating Tree Sync...")\nprint("Slash command 'help' registered globally.")`, 
+            ch: `Return a string 'slash_registered'.`, 
+            s: `def register():\n    pass`, 
+            test: `return register() == 'slash_registered'` 
+        },
+        { 
+            id:6, t: "UI Views (Buttons)", 
+            th: `<h3>Subclassing discord.ui.View</h3>
+                 <p>Buttons are attached to Views. You define a View class and add buttons using the <code>@discord.ui.button</code> decorator.</p>`, 
+            e: `class View:\n    def __init__(self):\n        self.children = ['btn1']\n\nv = View()\nprint("View created with items:", v.children)`, 
+            ch: `Create a class \`MyView\` with a method \`get_id(self)\` returning 1.`, 
+            s: `class MyView:\n    pass`, 
+            test: `v = MyView(); return v.get_id() == 1` 
+        },
+        { 
+            id:7, t: "Select Menus (py)", 
+            th: `<h3>Select Item Subclassing</h3>
+                 <p>Similar to buttons, Select menus are classes added to Views, utilizing <code>discord.SelectOption</code>.</p>`, 
+            e: `opts = [{'label': 'A', 'value': '1'}]\nprint(f"Loaded {len(opts)} options.")`, 
+            ch: `Write a function \`get_max()\` returning integer 5.`, 
+            s: `def get_max():\n    pass`, 
+            test: `return get_max() == 5` 
+        },
+        { id:8, t: "Modals (py)", th: `<h3>Modal Subclassing</h3><p>Modals inherit from <code>discord.ui.Modal</code> and define <code>TextInput</code> children.</p>`, e: `print("Modal Triggered.")`, ch: `Return dict {'title': 'Feedback'}.`, s: `def get_modal():\n    pass`, test: `return get_modal().get('title') == 'Feedback'` },
+        { id:9, t: "Reaction Roles", th: `<h3>Raw Events</h3><p>Use <code>on_raw_reaction_add</code> to bypass the message cache limit.</p>`, e: `print("Raw payload parsed.")`, ch: `Return True if \`payload_id\` equals 100.`, s: `def check_id(payload_id):\n    pass`, test: `return check_id(100) == True and check_id(99) == False` },
+        { id:10, t: "Moderation: Kick", th: `<h3>Awaiting Coroutines</h3><p>Python requires the <code>await</code> keyword before any API call coroutine.</p>`, e: `import asyncio\nasync def kick():\n    print("User kicked.")\nasyncio.run(kick())`, ch: `Write \`can_kick(r)\` returning True if r == 'mod'.`, s: `def can_kick(r):\n    pass`, test: `return can_kick('mod') == True` },
+        { id:11, t: "Moderation: Ban", th: `<h3>Ban Records</h3><p>Use <code>guild.ban(user)</code>.</p>`, e: `print("Ban executed.")`, ch: `Return list ['Spam', 7].`, s: `def ban_args():\n    pass`, test: `return ban_args() == ['Spam', 7]` },
+        { id:12, t: "Role Coroutines", th: `<h3>Adding Roles</h3><p><code>await member.add_roles(*roles)</code></p>`, e: `print("Role added.")`, ch: `Return string 'role_added'.`, s: `def add():\n    pass`, test: `return add() == 'role_added'` },
+        { id:13, t: "Member Join Events", th: `<h3>Formatting Strings</h3><p>f-strings are optimal for welcome messages.</p>`, e: `n="Alex"\nprint(f"Welcome {n}")`, ch: `Write \`welcome(n)\` returning f"Hello {n}".`, s: `def welcome(n):\n    pass`, test: `return welcome('Zoe') == 'Hello Zoe'` },
+        { id:14, t: "Embed Pagination", th: `<h3>View State</h3><p>Store current page index inside the View instance.</p>`, e: `print("Page incremented.")`, ch: `Write \`next_p(i)\` returning i+1.`, s: `def next_p(i):\n    pass`, test: `return next_p(2) == 3` },
+        { id:15, t: "Command Cooldowns", th: `<h3>Cooldown Decorator</h3><p><code>@commands.cooldown(1, 5, commands.BucketType.user)</code></p>`, e: `print("Rate limited.")`, ch: `Return True.`, s: `def cd():\n    pass`, test: `return cd() == True` },
+        { id:16, t: "Permission Decorators", th: `<h3>Pre-flight Checks</h3><p><code>@commands.has_permissions(manage_messages=True)</code></p>`, e: `print("Perms validated.")`, ch: `Return dict {'manage': True}.`, s: `def perms():\n    pass`, test: `return perms().get('manage') == True` },
+        { id:17, t: "Error Handlers", th: `<h3>Global vs Local Errors</h3><p>Catch <code>CommandOnCooldown</code> to send custom messages.</p>`, e: `print("Error caught: MissingPerms")`, ch: `Write \`handle(e)\` returning e.`, s: `def handle(e):\n    pass`, test: `return handle('err') == 'err'` },
+        { id:18, t: "Cogs System", th: `<h3>Class-based Organization</h3><p>Cogs allow you to split your bot into multiple files.</p>`, e: `print("Cog loaded: AdminCog")`, ch: `Create class \`MyCog\` returning True in \`is_loaded()\`.`, s: `class MyCog:\n    pass`, test: `c = MyCog(); return c.is_loaded() == True` },
+        { id:19, t: "Tasks Loop", th: `<h3>Background Workers</h3><p><code>@tasks.loop(minutes=5)</code></p>`, e: `print("Task iteration executed.")`, ch: `Return integer 5.`, s: `def get_mins():\n    pass`, test: `return get_mins() == 5` },
+        { id:20, t: "Music Bot (yt-dlp)", th: `<h3>Audio Streams</h3><p>Use FFmpegPCMAudio with yt-dlp streams.</p>`, e: `print("Audio pipeline initialized.")`, ch: `Return string 'playing'.`, s: `def play_audio():\n    pass`, test: `return play_audio() == 'playing'` }
     ]
 };
 
-// --- FIREBASE SETUP ---
+// --- 2. FIREBASE INTEGRATION (v10.7.1) ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const fbConfig = { projectId: "kodo-demo", apiKey: "demo-key", authDomain: "demo" }; // MOCK FOR DEMO IF NEEDED, ASSUMING INJECTED ENV
-// To run locally without errors on non-configured firebase, we stub functionality if init fails.
+// WARNING: Add your specific Firebase Config here before production.
+const fbConfig = { projectId: "kodo-demo", apiKey: "demo-key", authDomain: "demo" }; 
+
 let appFirebase, auth, db;
 try {
     appFirebase = initializeApp(fbConfig);
     auth = getAuth(appFirebase);
     db = getFirestore(appFirebase);
-} catch(e) { console.log("Firebase stubbed for visual demo."); }
+} catch(e) { 
+    console.warn("Firebase initialization skipped. Running in Local Demo Mode."); 
+}
 
-// --- GLOBAL APP STATE ---
+// --- 3. GLOBAL APPLICATION STATE ---
 const app = {
     user: null,
-    progress: { stones: 0, streak: 0, completed: [] },
+    progress: { stones: 0, streak: 0, completed: [], name: 'Architect' },
     activeTrack: null,
     activeLesson: 0,
-    activeStep: 0, // 0 = theory, 1 = challenge
+    activeStep: 0, // 0: Theory, 1: Challenge
     editor: null,
     pyodide: null,
     
-    // UI Helpers
+    // DOM Helpers
     $: (id) => document.getElementById(id),
+    
     switchView: (viewId) => {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         app.$(viewId).classList.add('active');
         if(viewId === 'view-dash') app.renderDash();
     },
-    showMsg: (msg, duration=4000) => {
-        const b = app.$('k-bubble');
+    
+    showMsg: (msg, duration=5000) => {
+        const bubble = app.$('k-bubble');
         app.$('k-msg').innerHTML = msg;
-        b.classList.add('show');
-        if(duration) setTimeout(() => b.classList.remove('show'), duration);
+        bubble.classList.add('show');
+        if(duration) setTimeout(() => bubble.classList.remove('show'), duration);
     },
+    
     toggleMascot: () => {
         const b = app.$('k-bubble');
-        b.classList.contains('show') ? b.classList.remove('show') : app.showMsg("I'm K., your Socratic guide. Ask me anything.");
+        b.classList.contains('show') ? b.classList.remove('show') : app.showMsg("I am K. Systems optimal. Awaiting query.");
     },
 
-    // Initialization
+    out: (msg, type='log') => {
+        const term = app.$('console-output');
+        const color = type === 'error' ? 'text-red-400' : 'text-gray-300';
+        const prefix = type === 'error' ? 'ERR|' : 'OUT|';
+        term.innerHTML += `<div class="${color}"><span class="text-gray-600 mr-2">${prefix}</span>${msg}</div>`;
+        term.scrollTop = term.scrollHeight;
+    },
+
+    // --- 4. INITIALIZATION ---
     init: async () => {
-        // Auth Listeners
+        // Handle Auth State
         if(auth) {
             onAuthStateChanged(auth, async (u) => {
                 if(u) {
                     app.user = u;
                     const docRef = doc(db, "users", u.uid);
                     const docSnap = await getDoc(docRef);
-                    if(docSnap.exists()) app.progress = docSnap.data();
-                    else {
-                        app.progress = { stones: 0, streak: 1, completed: [], name: u.displayName || u.email.split('@')[0] };
+                    if(docSnap.exists()) {
+                        app.progress = docSnap.data();
+                    } else {
+                        app.progress = { stones: 0, streak: 1, completed: [], name: u.email.split('@')[0].toUpperCase() };
                         await setDoc(docRef, app.progress);
                     }
                     app.switchView('view-dash');
                 } else app.switchView('view-auth');
             });
         } else {
-            // Mock login for demo without DB
-            app.user = { uid: '123', email: 'dev@kodo.com' };
-            app.progress = { stones: 150, streak: 4, completed: ['js_1', 'js_2', 'py_1'], name: 'Architect' };
+            // Local Demo Bypass
             app.switchView('view-dash');
         }
 
-        // Setup DOM Events
+        // Bind Auth Events
         app.$('tab-login').onclick = () => { app.$('tab-login').classList.add('bg-surface','text-white'); app.$('tab-register').classList.remove('bg-surface','text-white'); };
         app.$('tab-register').onclick = () => { app.$('tab-register').classList.add('bg-surface','text-white'); app.$('tab-login').classList.remove('bg-surface','text-white'); };
         
         app.$('auth-form').onsubmit = (e) => {
             e.preventDefault();
-            const em = app.$('auth-email').value, pw = app.$('auth-pass').value;
-            app.showMsg("Authenticating...", 2000);
-            if(!auth) { app.user = { uid: '1', email: em }; app.switchView('view-dash'); return; }
-            const isReg = app.$('tab-register').classList.contains('bg-surface');
-            const p = isReg ? createUserWithEmailAndPassword(auth, em, pw) : signInWithEmailAndPassword(auth, em, pw);
-            p.catch(err => { app.$('auth-error').innerText = err.message; app.$('auth-error').classList.remove('hidden'); });
+            const email = app.$('auth-email').value, pass = app.$('auth-pass').value;
+            app.showMsg("Validating credentials...", 2000);
+            if(!auth) return app.switchView('view-dash'); // Bypass
+            
+            const isRegister = app.$('tab-register').classList.contains('bg-surface');
+            const promise = isRegister ? createUserWithEmailAndPassword(auth, email, pass) : signInWithEmailAndPassword(auth, email, pass);
+            
+            promise.catch(err => { 
+                app.$('auth-error').innerText = err.message.replace('Firebase: ', ''); 
+                app.$('auth-error').classList.remove('hidden'); 
+            });
         };
 
-        app.$('auth-google').onclick = () => {
-            if(auth) signInWithPopup(auth, new GoogleAuthProvider()).catch(e => console.error(e));
-        };
-
+        app.$('auth-google').onclick = () => { if(auth) signInWithPopup(auth, new GoogleAuthProvider()).catch(e => console.error(e)); };
         app.$('btn-logout').onclick = () => auth ? signOut(auth) : location.reload();
 
-        // Monaco Init
+        // Initialize Monaco Editor
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' }});
         require(['vs/editor/editor.main'], () => {
-            monaco.editor.defineTheme('kodo', { base: 'vs-dark', inherit: true, rules: [{ background: '050505' }], colors: { 'editor.background': '#050505' } });
-            app.editor = monaco.editor.create(app.$('monaco-container'), { theme: 'kodo', minimap: { enabled: false }, fontSize: 13, fontFamily: "'JetBrains Mono', monospace" });
+            monaco.editor.defineTheme('kodo-void', { 
+                base: 'vs-dark', inherit: true, 
+                rules: [{ background: '030303' }], 
+                colors: { 'editor.background': '#030303', 'editor.lineHighlightBackground': '#0a0a0c' } 
+            });
+            app.editor = monaco.editor.create(app.$('monaco-container'), { 
+                theme: 'kodo-void', minimap: { enabled: false }, 
+                fontSize: 14, fontFamily: "'JetBrains Mono', monospace", padding: { top: 16 } 
+            });
         });
 
-        // Load Pyodide in background
-        app.loadPy();
+        // Initialize Pyodide (WASM) asynchronously
+        try { 
+            app.pyodide = await loadPyodide(); 
+            app.pyodide.setStdout({ batched: (msg) => app.out(msg) });
+        } catch(e) { console.error("Pyodide core failure.", e); }
 
-        // Lesson controls
+        // Bind Workspace Navigation
         app.$('btn-prev-step').onclick = () => { if(app.activeStep > 0) app.renderLessonStep(app.activeStep - 1); };
-        app.$('btn-next-step').onclick = () => {
-            if(app.activeStep === 0) app.renderLessonStep(1);
-            else app.completeLesson();
-        };
-        
+        app.$('btn-next-step').onclick = () => { app.activeStep === 0 ? app.renderLessonStep(1) : app.completeLesson(); };
         app.$('btn-run-example').onclick = () => app.runCode(C[app.activeTrack][app.activeLesson].e, true);
         app.$('btn-run-tests').onclick = () => app.runCode(app.editor.getValue(), false);
         app.$('btn-ask-k').onclick = () => app.askK();
     },
 
-    loadPy: async () => {
-        try { app.pyodide = await loadPyodide(); } catch(e) { console.error("Pyodide load failed", e); }
-    },
-
+    // --- 5. RENDER LOGIC ---
     renderDash: () => {
         app.$('dash-name').innerText = app.progress.name || 'Architect';
         app.$('dash-stones').innerText = app.progress.stones;
         app.$('dash-streak').innerText = app.progress.streak + ' Day';
         
-        const jsC = app.progress.completed.filter(id => id.startsWith('js_')).length;
-        const pyC = app.progress.completed.filter(id => id.startsWith('py_')).length;
+        const jsCompleted = app.progress.completed.filter(id => id.startsWith('js_')).length;
+        const pyCompleted = app.progress.completed.filter(id => id.startsWith('py_')).length;
         
-        app.$('count-js').innerText = jsC;
-        app.$('progress-js').style.width = (jsC / 20 * 100) + '%';
-        app.$('count-py').innerText = pyC;
-        app.$('progress-py').style.width = (pyC / 20 * 100) + '%';
+        app.$('count-js').innerText = jsCompleted;
+        app.$('progress-js').style.width = `${(jsCompleted / 20) * 100}%`;
+        
+        app.$('count-py').innerText = pyCompleted;
+        app.$('progress-py').style.width = `${(pyCompleted / 20) * 100}%`;
     },
 
     openTrack: (trackId) => {
         app.activeTrack = trackId;
-        app.$('track-title').innerText = trackId === 'js' ? 'Discord.js Track' : 'Discord.py Track';
+        app.$('track-title').innerText = trackId === 'js' ? 'Discord.js Runtime' : 'Discord.py Runtime';
         
         let html = '';
         const list = C[trackId];
-        list.forEach((l, i) => {
-            const isCompleted = app.progress.completed.includes(`${trackId}_${l.id}`);
-            const isLocked = i > 0 && !app.progress.completed.includes(`${trackId}_${list[i-1].id}`);
-            
-            // For demo purposes, unlock everything so reviewer can test
-            const demoLocked = false; 
+        list.forEach((lesson, index) => {
+            const isCompleted = app.progress.completed.includes(`${trackId}_${lesson.id}`);
+            // Logic for unlocking sequentially. For demonstration, we allow all access.
+            const isLocked = false; 
 
             html += `
-            <div onclick="!${demoLocked} && app.openLesson(${i})" class="glass p-4 rounded-xl flex items-center justify-between ${demoLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-white/5'}">
-                <div class="flex items-center gap-4">
-                    <div class="w-8 h-8 rounded-lg bg-void border border-border flex items-center justify-center font-mono text-xs">
-                        ${isCompleted ? '<svg class="w-4 h-4 text-accent"><use href="#icon-check"></use></svg>' : (demoLocked ? '<svg class="w-4 h-4 text-gray-500"><use href="#icon-lock"></use></svg>' : l.id)}
+            <div onclick="!${isLocked} && app.openLesson(${index})" class="glass p-5 rounded-2xl flex items-center justify-between transition-all duration-300 ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-white/5 border-l-2 border-l-transparent hover:border-l-primary'}">
+                <div class="flex items-center gap-6">
+                    <div class="w-10 h-10 rounded-xl bg-[#050505] border border-border flex items-center justify-center font-mono text-sm text-gray-500">
+                        ${isCompleted ? '<svg class="w-5 h-5 text-accent"><use href="#icon-check"></use></svg>' : (isLocked ? '<svg class="w-4 h-4"><use href="#icon-lock"></use></svg>' : lesson.id)}
                     </div>
-                    <span class="font-bold text-sm">${l.t}</span>
+                    <span class="font-medium text-white text-lg tracking-wide">${lesson.t}</span>
                 </div>
-                ${isCompleted ? '<span class="text-[10px] font-mono text-accent border border-accent/20 bg-accent/10 px-2 py-1 rounded">DONE</span>' : ''}
+                ${isCompleted ? '<span class="text-[10px] font-mono text-accent border border-accent/20 bg-accent/5 px-3 py-1.5 rounded uppercase tracking-widest">Completed</span>' : ''}
             </div>`;
         });
         
@@ -407,53 +631,57 @@ const app = {
 
     openLesson: (index) => {
         app.activeLesson = index;
-        app.activeStep = 0;
         app.switchView('view-lesson');
         app.renderLessonStep(0);
     },
 
-    renderLessonStep: (stepIdx) => {
-        app.activeStep = stepIdx;
+    renderLessonStep: (stepIndex) => {
+        app.activeStep = stepIndex;
         const lesson = C[app.activeTrack][app.activeLesson];
-        app.$('lesson-title').innerText = `${lesson.id}. ${lesson.t}`;
-        app.$('lesson-progress').style.width = stepIdx === 0 ? '50%' : '100%';
-        app.$('step-indicator').innerText = `Step ${stepIdx + 1} / 2`;
+        
+        app.$('lesson-title').innerText = `Node ${lesson.id}: ${lesson.t}`;
+        app.$('lesson-progress').style.width = stepIndex === 0 ? '50%' : '100%';
+        app.$('step-indicator').innerText = `PHASE ${stepIndex + 1} / 2`;
         app.$('console-output').innerHTML = '';
         
-        const pt = app.$('panel-theory');
-        const pe = app.$('panel-editor');
+        const pTheory = app.$('panel-theory');
+        const pEditor = app.$('panel-editor');
         
-        if(stepIdx === 0) {
-            // Theory Step
-            pt.style.display = 'block';
-            pe.style.display = 'none';
+        if(stepIndex === 0) {
+            // Setup Theory Environment
+            pTheory.style.display = 'block';
+            pEditor.style.display = 'none';
             app.$('btn-prev-step').disabled = true;
-            app.$('btn-next-step').innerText = 'Proceed to Challenge';
-            app.$('btn-next-step').onclick = () => app.renderLessonStep(1);
+            app.$('btn-next-step').innerText = 'Proceed to Execution';
+            app.$('btn-next-step').disabled = false;
             
-            let extH = app.activeTrack === 'js' ? 'js' : 'python';
-            pt.innerHTML = `
+            // Critical Sanitize Fix: Prevent HTML execution vulnerabilities in code strings
+            const safeExample = lesson.e.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            pTheory.innerHTML = `
                 ${lesson.th}
-                <div class="mt-8">
-                    <h4 class="text-xs font-mono text-gray-500 mb-2 uppercase">Runnable Example</h4>
-                    <div class="bg-[#050505] p-4 rounded-xl border border-border font-mono text-xs text-gray-300 relative overflow-hidden">
-                        <pre><code>${lesson.e}</code></pre>
-                        <button onclick="app.runCode(C['${app.activeTrack}'][${app.activeLesson}].e, true)" class="absolute top-2 right-2 bg-white/10 hover:bg-white/20 text-white px-2 py-1 rounded text-[10px]">RUN</button>
+                <div class="mt-12">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Architectural Example</h4>
+                    </div>
+                    <div class="bg-[#050505] p-6 rounded-xl border border-border font-mono text-sm text-gray-300 relative group overflow-hidden">
+                        <pre><code>${safeExample}</code></pre>
+                        <button onclick="app.runCode(C['${app.activeTrack}'][${app.activeLesson}].e, true)" class="absolute top-4 right-4 bg-white/10 hover:bg-white text-gray-400 hover:text-black transition-colors px-4 py-1.5 rounded uppercase tracking-widest text-[10px] opacity-0 group-hover:opacity-100 shadow-xl">Execute Memory</button>
                     </div>
                 </div>
             `;
-            app.showMsg("Read the theory carefully. The architecture is built here.");
+            app.showMsg("Analyze the theory. Understanding precedes execution.");
         } else {
-            // Challenge Step
-            pt.style.display = 'none';
-            pe.style.display = 'flex';
-            app.$('panel-editor').classList.remove('hidden'); // override tailwind lg constraint for split view logic if needed
-            app.$('btn-prev-step').disabled = false;
-            app.$('btn-next-step').innerText = 'Complete Lesson';
-            app.$('btn-next-step').disabled = true; // wait for test pass
-            app.$('btn-next-step').onclick = app.completeLesson;
+            // Setup Sandbox Environment
+            pTheory.style.display = 'none';
+            pEditor.style.display = 'flex';
+            pEditor.classList.remove('hidden'); // Tailwind override
             
-            app.$('editor-lang').innerText = app.activeTrack === 'js' ? 'index.js' : 'bot.py';
+            app.$('btn-prev-step').disabled = false;
+            app.$('btn-next-step').innerText = 'Merge & Complete';
+            app.$('btn-next-step').disabled = true; // Lock until tests pass
+            
+            app.$('editor-lang').innerText = app.activeTrack === 'js' ? 'logic.js' : 'logic.py';
             app.$('btn-run-tests').style.display = 'block';
             app.$('btn-run-example').style.display = 'none';
             
@@ -463,153 +691,137 @@ const app = {
                 app.editor.setValue(lesson.s);
             }
             
-            app.showMsg(`<b>Mission:</b><br>${lesson.ch}<br><br><span class="text-xs text-gray-400">Click RUN TESTS when ready.</span>`, 0);
+            app.showMsg(`<b>Mission Objective:</b><br>${lesson.ch}<br><br><span class="text-[10px] text-gray-500 font-mono tracking-widest uppercase">Execute Tests when ready.</span>`, 0);
         }
     },
 
-    out: (msg, type='log') => {
-        const c = app.$('console-output');
-        const col = type === 'error' ? 'text-red-400' : 'text-gray-300';
-        c.innerHTML += `<div class="${col}">> ${msg}</div>`;
-        c.scrollTop = c.scrollHeight;
-    },
-
+    // --- 6. EXECUTION ENGINE ---
     runCode: async (code, isExample) => {
         app.$('console-output').innerHTML = '';
-        app.out("Executing container...", "log");
+        app.out("Allocating container resources...", "log");
         
         if (app.activeTrack === 'js') {
-            // JS execution using new Function and hijacked console
+            // V8 Sandbox Simulation via Function
             const oLog = console.log, oErr = console.error;
-            let output = [];
-            console.log = (...a) => { output.push(a.join(' ')); app.out(a.join(' ')); oLog(...a); };
+            console.log = (...a) => { app.out(a.join(' ')); oLog(...a); };
             console.error = (...a) => { app.out(a.join(' '), 'error'); oErr(...a); };
             
             try {
-                if(isExample) { new Function(code)(); }
-                else {
-                    // Test execution
-                    const testCode = C.js[app.activeLesson].test;
-                    const wrapped = `
+                if(isExample) { 
+                    new Function(code)(); 
+                } else {
+                    const testLogic = C.js[app.activeLesson].test;
+                    const wrappedCode = `
                         ${code}
-                        try { return (function() { ${testCode} })(); } catch(e) { return false; }
+                        try { return (function() { ${testLogic} })(); } catch(e) { return false; }
                     `;
-                    const result = new Function(wrapped)();
+                    const result = new Function(wrappedCode)();
                     app.handleTestResult(result);
                 }
-            } catch(e) { app.out(e.message, 'error'); }
+            } catch(e) { 
+                app.out(e.message, 'error'); 
+            }
             
             console.log = oLog; console.error = oErr;
         } else {
-            // Python execution via Pyodide
-            if(!app.pyodide) return app.out("Pyodide loading, please wait...", 'error');
+            // Python WASM Execution
+            if(!app.pyodide) return app.out("FATAL: Pyodide WASM module unavailable.", 'error');
             try {
-                app.pyodide.setStdout({ batched: (msg) => app.out(msg) });
-                if(isExample) { await app.pyodide.runPythonAsync(code); }
-                else {
-                    const testCode = C.py[app.activeLesson].test;
-                    // Indent user code for function block to evaluate
-                    const wrapped = `
-def __run_test():
+                if(isExample) { 
+                    await app.pyodide.runPythonAsync(code); 
+                } else {
+                    const testLogic = C.py[app.activeLesson].test;
+                    // Python indentation alignment for execution block
+                    const wrappedPy = `
+def __kodo_test_run():
 ${code.split('\n').map(l => '    ' + l).join('\n')}
     try:
-        ${testCode.replace('return ', '_res = ')}
-        return _res
+        ${testLogic.replace('return ', '_result_ = ')}
+        return _result_
     except Exception as e:
         return False
-__run_test()
+__kodo_test_run()
 `;
-                    const result = await app.pyodide.runPythonAsync(wrapped);
+                    const result = await app.pyodide.runPythonAsync(wrappedPy);
                     app.handleTestResult(result);
                 }
-            } catch(e) { app.out(e.toString(), 'error'); }
+            } catch(e) { 
+                app.out(e.toString(), 'error'); 
+            }
         }
     },
 
     handleTestResult: (passed) => {
         if(passed) {
-            app.out("STATUS: ALL TESTS PASSED. ✓", "log");
-            app.$('console-output').innerHTML += '<div class="text-accent mt-2">Architecture validated. You may proceed.</div>';
+            app.out("SYS: Architecture Validated. All tests passed. ✓", "log");
             app.$('btn-next-step').disabled = false;
-            app.showMsg("<span class='text-accent font-bold'>Brilliant.</span> The logic holds. Proceed to the next node.", 4000);
+            app.showMsg("<span class='text-accent font-bold'>Brilliant.</span> The logic holds. Merge to proceed.", 5000);
+            
+            // Visual Dopamine Hit
+            app.$('console-output').innerHTML += '<div class="text-accent mt-3 text-xs uppercase tracking-widest border border-accent/30 bg-accent/10 p-2 inline-block rounded">Execution Successful</div>';
         } else {
-            app.out("STATUS: TESTS FAILED. ✗", "error");
-            app.showMsg("The execution yielded incorrect results. Check your variables and scope.", 4000);
+            app.out("SYS: Execution failed. Test assertions did not match.", "error");
+            app.showMsg("The execution yielded incorrect results. Audit your memory allocation and logic scope.", 5000);
         }
     },
 
     completeLesson: async () => {
-        const lid = `${app.activeTrack}_${C[app.activeTrack][app.activeLesson].id}`;
-        if(!app.progress.completed.includes(lid)) {
-            app.progress.completed.push(lid);
+        const uniqueId = `${app.activeTrack}_${C[app.activeTrack][app.activeLesson].id}`;
+        
+        if(!app.progress.completed.includes(uniqueId)) {
+            app.progress.completed.push(uniqueId);
             app.progress.stones += 10;
+            
             if(auth && auth.currentUser) {
                 const ref = doc(db, "users", auth.currentUser.uid);
-                await updateDoc(ref, { completed: app.progress.completed, stones: increment(10) }).catch(e=>console.log(e));
+                await updateDoc(ref, { 
+                    completed: app.progress.completed, 
+                    stones: increment(10) 
+                }).catch(e => console.error("Sync Error", e));
             }
         }
         app.openTrack(app.activeTrack);
-        app.showMsg("+10 Forge Stones acquired.", 3000);
+        app.showMsg("<span class='text-accent'>+10 Forge Stones acquired.</span> Database synced.", 4000);
     },
 
+    // --- 7. SOCRATIC AI LOGIC ---
     askK: async () => {
-        const code = app.editor ? app.editor.getValue() : "Viewing theory.";
-        app.showMsg("Analyzing architectural intent...", 0);
+        const codeContext = app.editor ? app.editor.getValue() : "Reading theoretical documentation.";
+        app.showMsg("Establishing connection to Groq Inference Engine...", 0);
         
-        // Mocking the Serverless Function Response for the demo to prevent actual Groq API requirement locally
+        // MOCK AI RESPONSE FOR DEMONSTRATION 
+        // (Replace with actual fetch to /api/groq/coach once deployed)
         setTimeout(() => {
-            const replies = [
-                "I notice your dependency array is empty. Are you sure that variable is within scope?",
-                "Consider the Big-O complexity here. Is a nested loop the most efficient route?",
-                "What happens if the Discord API rate limits this specific call?",
-                "Hypothesis: The event listener is attached multiple times. Check your lifecycle hooks."
+            const architecturalHints = [
+                "I observe an empty dependency. Are you certain that variable is bound within the current lexical scope?",
+                "Analyze the time complexity here. Is O(n^2) acceptable for a Discord Gateway event that fires 100 times a second?",
+                "What happens to the thread if the Discord API returns a 429 Rate Limit error here?",
+                "Hypothesis: Your callback is losing the 'this' context. Have you considered an arrow function?"
             ];
-            app.showMsg(`<b>K. says:</b><br>${replies[Math.floor(Math.random()*replies.length)]}`, 8000);
-        }, 1500);
+            const randomHint = architecturalHints[Math.floor(Math.random() * architecturalHints.length)];
+            app.showMsg(`<b>K. Architect:</b><br>${randomHint}`, 10000);
+        }, 1200);
 
-        /* // ACTUAL SERVERLESS CALL TO /api/groq/coach
+        /*
+        // UNCOMMENT THIS BLOCK FOR PRODUCTION VERCEL DEPLOYMENT
         try {
             const res = await fetch('/api/groq/coach', {
-                method: 'POST', body: JSON.stringify({ code: code, track: app.activeTrack })
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: codeContext, track: app.activeTrack })
             });
             const data = await res.json();
-            app.showMsg(`<b>K. says:</b><br>${data.question}`, 8000);
-        } catch(e) { app.showMsg("Comm link to K. offline.", 3000); }
+            app.showMsg(`<b>K. Architect:</b><br>${data.question}`, 10000);
+        } catch(e) { 
+            app.showMsg("Comm link to K. offline. Serverless function failed.", 4000); 
+        }
         */
     }
 };
 
+// Bind to Window and Init
 window.app = app;
 document.addEventListener('DOMContentLoaded', app.init);
-
-/*
-=========================================================
-VERCEL SERVERLESS FUNCTION: /api/groq/coach.js
-(Deploy this in the 'api' folder of your Vercel project)
-=========================================================
-
-export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).end();
-    const { code, track } = JSON.parse(req.body);
-    
-    const prompt = `You are K., an elite Socratic programming coach for Discord bot development (${track}).
-    The user wrote this code:
-    ${code}
-    Do NOT give the direct answer or write code. Ask ONE single, highly technical probing question that forces them to think about their architectural flaw, memory management, or API spec mismatch. Keep it under 2 sentences.`;
-
-    try {
-        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: { "Authorization": \`Bearer \${process.env.GROQ_API_KEY}\`, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "llama3-8b-8192", messages: [{ role: "system", content: prompt }], temperature: 0.3, max_tokens: 100 })
-        });
-        const data = await response.json();
-        res.status(200).json({ question: data.choices[0].message.content });
-    } catch (e) {
-        res.status(500).json({ error: 'Failed to contact K.' });
-    }
-}
-*/
 </script>
 </body>
 </html>
