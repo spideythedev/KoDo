@@ -1,30 +1,37 @@
 // api/groq/coach.js
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).end();
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
     
-    const { code, context, error } = req.body;
+    const { code, context, error, labId } = req.body;
     const apiKey = process.env.GROQ_API_KEY;
     
-    // Socratic System Prompt (Arceus-tier restriction)
-    const systemPrompt = `
-You are K., an elite software architect coaching a senior engineer.
-You NEVER provide the corrected code. You NEVER write code snippets in your answers.
-You ONLY ask probing, Socratic questions that expose logical flaws or edge cases.
-Your tone is terse, precise, and assumes the user is highly competent but temporarily blind to a specific detail.
-Context: The user is writing ${context} code.
-    `;
+    if (!apiKey) {
+        return res.status(500).json({ error: 'API key not configured' });
+    }
+    
+    // Rate limiting (simple per-IP)
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    // In production, use Upstash Redis for proper rate limiting
+    
+    const systemPrompt = `You are K., an elite software architect coaching a developer through the KoDo platform.
+Current lab context: ${labId || 'General programming'}
+You NEVER provide the complete solution. You ask Socratic questions that guide the developer to discover the answer themselves.
+Your tone is precise, slightly demanding, and assumes competence.`;
 
     const userPrompt = `
 Code:
 \`\`\`
 ${code}
 \`\`\`
-${error ? `Error observed: ${error}` : ''}
-What is the one critical question I should ask myself about this implementation?
-    `;
+${error ? `Error: ${error}` : 'The tests are failing.'}
+
+What is the ONE critical question I should ask myself right now?
+`;
 
     try {
-        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
@@ -36,14 +43,20 @@ What is the one critical question I should ask myself about this implementation?
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
-                temperature: 0.2,
+                temperature: 0.3,
                 max_tokens: 150
             })
         });
         
-        const data = await groqRes.json();
-        res.status(200).json({ content: data.choices[0].message.content });
-    } catch (e) {
-        res.status(500).json({ content: "K. is thinking... (Service disruption)" });
+        const data = await response.json();
+        
+        res.status(200).json({ 
+            content: data.choices[0].message.content 
+        });
+    } catch (error) {
+        console.error('Groq API error:', error);
+        res.status(500).json({ 
+            content: 'K. is thinking deeply. Ask again in a moment.' 
+        });
     }
 }
