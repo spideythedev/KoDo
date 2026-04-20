@@ -11,7 +11,8 @@ import {
     updateProfile
 } from './firebase.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { doc, setDoc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getAllLabs } from './curriculum.js';
 
 // --- State Management ---
 export const AppState = new Proxy({
@@ -20,7 +21,7 @@ export const AppState = new Proxy({
     currentLab: null,
     route: 'dashboard',
     theme: 'dark',
-    authMode: 'login' // 'login' or 'register'
+    authMode: 'login'
 }, {
     set(target, prop, value) {
         target[prop] = value;
@@ -29,7 +30,6 @@ export const AppState = new Proxy({
     }
 });
 
-// --- Router & Renderer ---
 const root = document.getElementById('app-root');
 
 async function renderApp() {
@@ -40,7 +40,6 @@ async function renderApp() {
         return;
     }
 
-    // Fetch/Create user profile in Firestore
     await syncUserProfile(user);
 
     if (route === 'dashboard') {
@@ -50,7 +49,10 @@ async function renderApp() {
     } else if (route === 'workspace') {
         const { renderWorkspace } = await import('./components/workspace.js');
         root.innerHTML = renderWorkspace(AppState.currentLab);
-        setTimeout(() => import('./monaco.js').then(m => m.initMonaco()), 10);
+        setTimeout(async () => {
+            const monaco = await import('./monaco.js');
+            await monaco.initMonaco();
+        }, 10);
     }
 }
 
@@ -59,7 +61,6 @@ function renderAuthScreen() {
     
     root.innerHTML = `
         <div class="flex flex-col items-center justify-center min-h-screen p-8">
-            <!-- Logo & Title -->
             <div class="text-center space-y-2 mb-12">
                 <div class="relative mb-6">
                     <div class="w-16 h-16 mx-auto relative">
@@ -73,10 +74,7 @@ function renderAuthScreen() {
                 <p class="text-xs uppercase tracking-[.4em] text-white/30">The Forge</p>
             </div>
             
-            <!-- Auth Card -->
             <div class="glass-panel w-full max-w-md p-8 rounded-lg">
-                
-                <!-- Mode Tabs -->
                 <div class="flex gap-2 mb-8 border-b border-subtle">
                     <button id="tab-login" class="flex-1 pb-3 text-sm font-medium transition-all ${isLogin ? 'text-white border-b-2 border-blue-500' : 'text-white/40 hover:text-white/60'}">
                         Sign In
@@ -86,7 +84,6 @@ function renderAuthScreen() {
                     </button>
                 </div>
                 
-                <!-- Google Auth Button -->
                 <button id="google-auth-btn" class="w-full glass-panel py-3 px-4 rounded-md flex items-center justify-center gap-3 text-sm font-medium text-white/80 hover:text-white hover:border-white/20 transition-all mb-6">
                     <svg class="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -97,7 +94,6 @@ function renderAuthScreen() {
                     Continue with Google
                 </button>
                 
-                <!-- Divider -->
                 <div class="relative my-6">
                     <div class="absolute inset-0 flex items-center">
                         <div class="w-full border-t border-subtle"></div>
@@ -107,10 +103,8 @@ function renderAuthScreen() {
                     </div>
                 </div>
                 
-                <!-- Email/Password Form -->
                 <form id="auth-form" class="space-y-4">
                     ${!isLogin ? `
-                        <!-- Display Name (Register only) -->
                         <div>
                             <label class="block text-xs text-white/40 mb-1.5 uppercase tracking-wider">Display Name</label>
                             <input type="text" id="display-name" name="displayName" class="w-full bg-white/5 border border-subtle rounded-md px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-blue-500/50 transition-colors" placeholder="John Doe">
@@ -128,7 +122,6 @@ function renderAuthScreen() {
                     </div>
                     
                     ${isLogin ? `
-                        <!-- Forgot Password Link -->
                         <div class="text-right">
                             <button type="button" id="forgot-password-btn" class="text-xs text-white/40 hover:text-white/60 transition-colors">
                                 Forgot password?
@@ -136,16 +129,13 @@ function renderAuthScreen() {
                         </div>
                     ` : ''}
                     
-                    <!-- Error Message Container -->
                     <div id="auth-error" class="text-xs text-red-400 min-h-[20px] hidden"></div>
                     
-                    <!-- Submit Button -->
                     <button type="submit" class="w-full glass-panel py-3 px-4 rounded-md text-sm font-medium text-white bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all">
                         ${isLogin ? 'Sign In' : 'Create Account'}
                     </button>
                 </form>
                 
-                <!-- Switch Mode Text -->
                 <p class="text-center text-xs text-white/30 mt-6">
                     ${isLogin ? "Don't have an account?" : "Already have an account?"}
                     <button id="switch-mode-btn" class="text-blue-400 hover:text-blue-300 transition-colors ml-1">
@@ -154,7 +144,6 @@ function renderAuthScreen() {
                 </p>
             </div>
             
-            <!-- Footer -->
             <p class="text-[10px] text-white/15 uppercase tracking-widest mt-8">kodo-559e9 • Arceus Core</p>
         </div>
     `;
@@ -163,7 +152,6 @@ function renderAuthScreen() {
 }
 
 function attachAuthListeners() {
-    // Tab switching
     document.getElementById('tab-login')?.addEventListener('click', () => {
         AppState.authMode = 'login';
     });
@@ -176,19 +164,16 @@ function attachAuthListeners() {
         AppState.authMode = AppState.authMode === 'login' ? 'register' : 'login';
     });
     
-    // Google Sign In
     document.getElementById('google-auth-btn')?.addEventListener('click', async () => {
         try {
             setAuthError(null);
-            const result = await signInWithPopup(auth, googleProvider);
-            console.log('[KoDo] Google sign in successful:', result.user.email);
+            await signInWithPopup(auth, googleProvider);
         } catch (error) {
             console.error('[KoDo] Google auth error:', error);
             setAuthError(getReadableAuthError(error.code));
         }
     });
     
-    // Email/Password Form
     document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         setAuthError(null);
@@ -204,19 +189,12 @@ function attachAuthListeners() {
         
         try {
             if (AppState.authMode === 'register') {
-                // Create account
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                
-                // Update profile with display name
                 if (displayName) {
                     await updateProfile(userCredential.user, { displayName });
                 }
-                
-                console.log('[KoDo] Account created:', userCredential.user.email);
             } else {
-                // Sign in
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                console.log('[KoDo] Sign in successful:', userCredential.user.email);
+                await signInWithEmailAndPassword(auth, email, password);
             }
         } catch (error) {
             console.error('[KoDo] Auth error:', error);
@@ -226,7 +204,6 @@ function attachAuthListeners() {
         }
     });
     
-    // Forgot Password
     document.getElementById('forgot-password-btn')?.addEventListener('click', async () => {
         const email = document.getElementById('email').value;
         
@@ -239,7 +216,6 @@ function attachAuthListeners() {
             await sendPasswordResetEmail(auth, email);
             setAuthError('Password reset email sent! Check your inbox.', 'success');
         } catch (error) {
-            console.error('[KoDo] Password reset error:', error);
             setAuthError(getReadableAuthError(error.code));
         }
     });
@@ -271,15 +247,11 @@ function getReadableAuthError(code) {
     const errors = {
         'auth/email-already-in-use': 'This email is already registered. Sign in instead.',
         'auth/invalid-email': 'Please enter a valid email address.',
-        'auth/operation-not-allowed': 'This sign-in method is not enabled.',
         'auth/weak-password': 'Password should be at least 6 characters.',
-        'auth/user-disabled': 'This account has been disabled.',
         'auth/user-not-found': 'No account found with this email.',
         'auth/wrong-password': 'Incorrect password. Try again or reset it.',
         'auth/too-many-requests': 'Too many attempts. Please try again later.',
         'auth/network-request-failed': 'Network error. Check your connection.',
-        'auth/popup-closed-by-user': 'Sign-in popup was closed.',
-        'auth/popup-blocked': 'Pop-up was blocked. Please allow pop-ups.',
     };
     return errors[code] || 'Authentication failed. Please try again.';
 }
@@ -289,22 +261,28 @@ async function syncUserProfile(user) {
     const userSnap = await getDoc(userRef);
     
     if (!userSnap.exists()) {
-        // New user - create profile
+        const allLabs = getAllLabs();
+        const labsProgress = {};
+        allLabs.forEach((lab, index) => {
+            labsProgress[lab.id] = {
+                status: index === 0 ? 'unlocked' : 'locked',
+                ttg: null,
+                bestTTG: null,
+                completedAt: null,
+                attempts: 0
+            };
+        });
+        
         const profile = {
             uid: user.uid,
             email: user.email,
             displayName: user.displayName || user.email?.split('@')[0] || 'Forger',
             photoURL: user.photoURL || null,
             createdAt: new Date().toISOString(),
-            labs: {
-                'js-lexical': { status: 'locked', ttg: null },
-                'discord-bot-core': { status: 'locked', ttg: null },
-                'python-async': { status: 'locked', ttg: null },
-                'cpp-pointers': { status: 'locked', ttg: null }
-            },
+            labs: labsProgress,
             purityScore: 100,
             kLevel: 'JUNIOR',
-            authProvider: user.providerData[0]?.providerId || 'email'
+            totalCompletions: 0
         };
         await setDoc(userRef, profile);
         AppState.userProfile = profile;
@@ -329,26 +307,66 @@ function attachDashboardListeners() {
         });
     });
     
-    const signOutBtn = document.getElementById('signout-btn');
-    if (signOutBtn) {
-        signOutBtn.addEventListener('click', async () => {
-            await signOut(auth);
-            AppState.user = null;
-            AppState.userProfile = null;
-            AppState.route = 'dashboard';
-            AppState.authMode = 'login';
-        });
-    }
-}
-
-// --- Bootstrap ---
-onAuthStateChanged(auth, (user) => {
-    AppState.user = user;
-    if (user) {
-        AppState.route = 'dashboard';
-    } else {
+    document.getElementById('signout-btn')?.addEventListener('click', async () => {
+        await signOut(auth);
+        AppState.user = null;
+        AppState.userProfile = null;
         AppState.route = 'dashboard';
         AppState.authMode = 'login';
-    }
+    });
+}
+
+// Bootstrap
+onAuthStateChanged(auth, (user) => {
+    AppState.user = user;
+    AppState.route = user ? 'dashboard' : 'dashboard';
+    if (!user) AppState.authMode = 'login';
     renderApp();
 });
+
+export async function updateUserProgress(labId, completed, ttg) {
+    if (!AppState.user) return;
+    
+    const userRef = doc(db, 'users', AppState.user.uid);
+    const labKey = `labs.${labId}`;
+    
+    const updates = {};
+    updates[`${labKey}.status`] = completed ? 'completed' : 'unlocked';
+    updates[`${labKey}.ttg`] = ttg;
+    if (completed) {
+        updates[`${labKey}.completedAt`] = new Date().toISOString();
+    }
+    
+    // Update best TTG
+    const currentBest = AppState.userProfile?.labs?.[labId]?.bestTTG;
+    if (!currentBest || ttg < currentBest) {
+        updates[`${labKey}.bestTTG`] = ttg;
+    }
+    
+    await updateDoc(userRef, updates);
+    
+    // Unlock next lab if completed
+    if (completed) {
+        const allLabs = getAllLabs();
+        const currentIndex = allLabs.findIndex(l => l.id === labId);
+        if (currentIndex < allLabs.length - 1) {
+            const nextLabId = allLabs[currentIndex + 1].id;
+            updates[`labs.${nextLabId}.status`] = 'unlocked';
+        }
+        
+        updates.totalCompletions = (AppState.userProfile.totalCompletions || 0) + 1;
+        
+        // Upgrade K. level
+        if (updates.totalCompletions >= 3) {
+            updates.kLevel = 'ARCHITECT';
+        } else if (updates.totalCompletions >= 1) {
+            updates.kLevel = 'SENIOR';
+        }
+        
+        await updateDoc(userRef, updates);
+    }
+    
+    // Refresh local profile
+    const userSnap = await getDoc(userRef);
+    AppState.userProfile = userSnap.data();
+}
