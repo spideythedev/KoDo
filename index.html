@@ -3,47 +3,494 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="KoDo — The Forge. Elite programming execution environment.">
+    <meta name="theme-color" content="#000000">
     <title>KoDo — The Forge</title>
-    <!-- Tailwind + Base Theme Overrides -->
+    
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Geist & Inter Fonts (Vercel Inspired) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Monaco Editor Loader -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.39.0/min/vs/loader.js"></script>
+    
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        /* Arceus-tier Spatial Dark Mode Overrides */
-        body { 
-            background-color: #000000; 
-            color: #EDEDEF; 
-            overscroll-behavior: none;
+        /* ============================================
+           KODO ARCEUS-TIER DESIGN SYSTEM
+           Pure Black • Spatial Dark • Glassmorphism
+           ============================================ */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        /* Custom Glassmorphism Utility (Tailwind doesn't do pure blur well) */
+        
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #08080A;
+            --bg-tertiary: #0A0A0C;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.12);
+            --text-primary: #EDEDEF;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.3);
+            --accent-blue: #00A3FF;
+            --accent-emerald: #10B981;
+            --accent-amber: #F59E0B;
+            --accent-red: #EF4444;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overscroll-behavior: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Glassmorphism Core Utility */
         .glass-panel {
             background: rgba(10, 10, 12, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                        background 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .border-subtle { border-color: rgba(255, 255, 255, 0.08); }
+        
+        .glass-panel:hover {
+            background: rgba(15, 15, 18, 0.8);
+            border-color: var(--border-hover);
+        }
+        
+        .border-subtle {
+            border-color: var(--border-subtle);
+        }
+        
+        /* Typography Scale */
+        .font-geist {
+            font-family: 'Inter', monospace;
+            letter-spacing: -0.02em;
+        }
+        
+        /* Cinematic Text Treatments */
+        .text-cinematic {
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+        }
+        
         /* Monaco Editor Container */
-        .monaco-editor-container { height: 100%; width: 100%; }
+        .monaco-editor-container {
+            height: 100%;
+            width: 100%;
+        }
+        
+        /* Custom Scrollbar — Minimalist */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0;
+            transition: background 0.2s;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        ::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+        
+        /* Prose / Markdown Styling */
+        .prose {
+            color: var(--text-primary);
+            line-height: 1.75;
+        }
+        
+        .prose h4 {
+            color: #FFFFFF;
+            font-weight: 500;
+            font-size: 1rem;
+            letter-spacing: -0.01em;
+        }
+        
+        .prose p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .prose code {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-family: 'Monaco', 'Menlo', monospace;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #A5D6FF;
+        }
+        
+        .prose strong {
+            color: #FFFFFF;
+            font-weight: 500;
+        }
+        
+        /* Error Vignette Animation */
+        .error-vignette {
+            position: relative;
+        }
+        
+        .error-vignette::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            box-shadow: inset 0 0 80px rgba(239, 68, 68, 0.12);
+            pointer-events: none;
+            animation: vignette-pulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+        }
+        
+        @keyframes vignette-pulse {
+            0% { opacity: 0; }
+            40% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        
+        /* Success Flash Animation */
+        .success-flash {
+            animation: success-flash 0.3s ease-out;
+        }
+        
+        @keyframes success-flash {
+            0% { background: rgba(16, 185, 129, 0); }
+            50% { background: rgba(16, 185, 129, 0.08); }
+            100% { background: rgba(16, 185, 129, 0); }
+        }
+        
+        /* Pulse Animation for K. Status */
+        @keyframes k-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .k-thinking {
+            animation: k-pulse 1.5s infinite;
+        }
+        
+        /* Cursor Blink Override */
+        .monaco-editor .cursor {
+            transition: opacity 0.1s;
+        }
+        
+        /* Loading State */
+        .loading-cinematic {
+            position: relative;
+        }
+        
+        .loading-cinematic::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+            animation: loading-slide 2s ease-in-out infinite;
+        }
+        
+        @keyframes loading-slide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Button Reset */
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        button:focus-visible {
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
+        }
+        
+        /* Selection Color */
+        ::selection {
+            background: rgba(0, 163, 255, 0.2);
+            color: #FFFFFF;
+        }
+        
+        ::-moz-selection {
+            background: rgba(0, 163, 255, 0.2);
+            color: #FFFFFF;
+        }
+        
+        /* Input/Output Font */
+        .font-mono {
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+        }
+        
+        /* Tooltip Styling */
+        [data-tooltip] {
+            position: relative;
+        }
+        
+        [data-tooltip]:hover::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 8px;
+            background: rgba(20, 20, 24, 0.95);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-size: 10px;
+            white-space: nowrap;
+            pointer-events: none;
+            backdrop-filter: blur(8px);
+            margin-bottom: 8px;
+        }
+        
+        /* Canvas Grid Pattern */
+        .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* Monaco Editor Custom Overrides */
+        .monaco-editor .margin {
+            background: #0A0A0C !important;
+        }
+        
+        .monaco-editor .line-numbers {
+            color: #4A5568 !important;
+        }
+        
+        .monaco-editor .current-line {
+            border: none !important;
+            background: rgba(255, 255, 255, 0.03) !important;
+        }
+        
+        .monaco-editor .view-overlays .current-line {
+            border: none !important;
+        }
+        
+        /* Prevent Text Selection Flicker */
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        /* Glassmorphism Card Hover Effect */
+        .card-hover-lift {
+            transition: transform 0.15s ease, border-color 0.2s ease;
+        }
+        
+        .card-hover-lift:hover {
+            transform: translateY(-1px);
+        }
     </style>
-    <!-- Monaco Loader (Global) -->
-    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.39.0/min/vs/loader.js"></script>
 </head>
-<body class="antialiased">
+<body class="antialiased overflow-hidden">
 
-    <!-- Main Application Mount -->
+    <!-- 
+        ============================================
+        KODO MAIN APPLICATION MOUNT
+        All dynamic content renders into #app-root
+        ============================================
+    -->
     <div id="app-root" class="h-screen w-screen flex flex-col overflow-hidden bg-black">
-        <!-- Loading State (Cinematic Pulse) -->
-        <div class="flex-1 flex items-center justify-center">
-            <div class="w-2 h-2 bg-blue-500/50 rounded-full animate-pulse"></div>
+        
+        <!-- Initial Loading State — Cinematic Pulse -->
+        <div class="flex-1 flex flex-col items-center justify-center">
+            <div class="space-y-8 text-center loading-cinematic">
+                <!-- Logo Mark -->
+                <div class="relative">
+                    <div class="w-12 h-12 mx-auto relative">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-emerald-500/20 rounded-full blur-xl"></div>
+                        <div class="relative w-full h-full flex items-center justify-center">
+                            <span class="text-3xl font-light text-white/80">K</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Title -->
+                <div>
+                    <h1 class="text-5xl font-light tracking-tight text-white mb-2">KoDo</h1>
+                    <p class="text-xs uppercase tracking-[.4em] text-white/30">The Forge</p>
+                </div>
+                
+                <!-- Loading Indicator -->
+                <div class="flex items-center justify-center gap-1 pt-8">
+                    <div class="w-1 h-1 bg-white/40 rounded-full animate-pulse" style="animation-delay: 0ms"></div>
+                    <div class="w-1 h-1 bg-white/40 rounded-full animate-pulse" style="animation-delay: 150ms"></div>
+                    <div class="w-1 h-1 bg-white/40 rounded-full animate-pulse" style="animation-delay: 300ms"></div>
+                </div>
+            </div>
+            
+            <!-- Footer Info -->
+            <div class="fixed bottom-8 text-center">
+                <p class="text-[10px] text-white/15 uppercase tracking-widest">kodo-559e9 • Arceus Core</p>
+            </div>
         </div>
+        
     </div>
 
-    <!-- Module Preload -->
+    <!-- 
+        ============================================
+        FIREBASE SDK INITIALIZATION
+        ============================================
+    -->
+    <script type="module">
+        // Firebase configuration is now handled in firebase.js
+        // This ensures clean separation of concerns
+        console.log('%c[KoDo] Forge Initializing...', 'color: #00A3FF; font-weight: 500');
+    </script>
+
+    <!-- 
+        ============================================
+        MAIN APPLICATION ENTRY POINT
+        ============================================
+    -->
     <script type="module" src="./app.js"></script>
     
-    <!-- Vercel Analytics (Optional, Premium feel) -->
+    <!-- 
+        ============================================
+        VERCEL ANALYTICS (Optional — Premium Feel)
+        ============================================
+    -->
     <script defer src="/_vercel/insights/script.js"></script>
+    
+    <!-- 
+        ============================================
+        ERROR BOUNDARY & GLOBAL ERROR HANDLER
+        ============================================
+    -->
+    <script>
+        // Global error handler for production resilience
+        window.addEventListener('error', (e) => {
+            console.error('[KoDo] Runtime Error:', e.error);
+            
+            // Prevent white screen of death — show graceful degradation
+            const root = document.getElementById('app-root');
+            if (root && !root.children.length) {
+                root.innerHTML = `
+                    <div class="h-full flex items-center justify-center">
+                        <div class="glass-panel p-8 text-center space-y-4">
+                            <p class="text-white/60">The Forge encountered an anomaly</p>
+                            <button onclick="location.reload()" class="px-4 py-2 text-sm text-white/40 hover:text-white/80 transition-colors">
+                                Reinitialize →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        // Handle unhandled promise rejections
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('[KoDo] Unhandled Promise Rejection:', e.reason);
+        });
+        
+        // Performance marker
+        performance.mark('kodo-init');
+    </script>
+    
+    <!-- 
+        ============================================
+        DYNAMIC MODULE PRELOAD (Performance)
+        ============================================
+    -->
+    <link rel="modulepreload" href="./firebase.js">
+    <link rel="modulepreload" href="./groq.js">
+    <link rel="modulepreload" href="./components/dashboard.js">
+    <link rel="modulepreload" href="./components/workspace.js">
+    
+    <!-- 
+        ============================================
+        FAVICON / MANIFEST (Placeholder)
+        ============================================
+    -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    
+    <!-- 
+        ============================================
+        ADDITIONAL STYLESHEET OVERRIDES
+        ============================================
+    -->
+    <style>
+        /* Ensure Monaco container fills properly */
+        #monaco-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Fix for Monaco overflow */
+        .monaco-editor {
+            position: absolute !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        /* Canvas container fixes */
+        #canvas-container {
+            position: relative;
+        }
+        
+        #visual-debug {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+        
+        /* Transition for K. inquiry panel */
+        #k-inquiry {
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+        
+        #k-inquiry[style*="opacity: 1"] {
+            pointer-events: auto;
+        }
+        
+        /* Smooth transitions for all interactive elements */
+        button, .glass-panel, a {
+            transition-property: background, border-color, color, opacity, transform;
+            transition-duration: 0.15s;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Disable transitions when user prefers reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </body>
 </html>
