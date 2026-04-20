@@ -1,97 +1,51 @@
-// components/dashboard.js
-import { getAllLabs } from '../curriculum.js';
-
 export function renderDashboard(user, profile) {
-    const kLevel = profile?.kLevel || 'JUNIOR';
-    const purityScore = profile?.purityScore || 100;
-    const labs = profile?.labs || {};
-    const totalCompletions = profile?.totalCompletions || 0;
-    
-    const allLabs = getAllLabs();
+    const islands = [
+        { id: 'js-basics', name: 'JavaScript Basics', unlocked: true, completed: false, position: { x: 20, y: 30 } },
+        { id: 'js-functions', name: 'Functions', unlocked: false, completed: false, position: { x: 50, y: 60 } },
+        // ... more islands
+    ];
     
     return `
-        <div class="h-full flex flex-col p-8">
-            <header class="flex justify-between items-center pb-12 border-b border-subtle">
-                <div class="flex items-center gap-3">
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                    <span class="text-xs font-mono uppercase tracking-wider text-white/50">K. ${kLevel} MODE</span>
+        <div class="h-full overflow-auto p-4 safe-top">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold">👋 Hi, ${user.displayName?.split(' ')[0] || 'Coder'}!</h1>
+                    <p class="text-white/50 text-sm">Forge Stones: ${profile?.stones || 0} 💎</p>
                 </div>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-white/40">${user.displayName || user.email}</span>
-                    ${user.photoURL ? 
-                        `<img src="${user.photoURL}" class="w-8 h-8 rounded-full border border-white/10" />` :
-                        `<div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                            <span class="text-xs">${user.email?.charAt(0).toUpperCase()}</span>
-                        </div>`
-                    }
-                    <button id="signout-btn" class="text-white/30 hover:text-white/60 transition-colors text-xs px-2">⟶</button>
-                </div>
-            </header>
-
-            <div class="flex-1 py-12 overflow-y-auto">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-xs font-bold uppercase tracking-[.25em] text-white/30">Active Forges</h2>
-                    <span class="text-[10px] text-white/20">${totalCompletions}/${allLabs.length} Completed</span>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    ${generateLabCards(allLabs, labs)}
-                </div>
+                <button id="signout-btn" class="text-white/40">🚪</button>
             </div>
             
-            <footer class="pt-8 border-t border-subtle flex justify-between items-center">
-                <div class="text-[10px] text-white/20">
-                    K. Level: ${kLevel} • ${getNextLevelMessage(kLevel, totalCompletions)}
-                </div>
-                <div class="flex items-center gap-2 text-white/20 text-xs">
-                    <span>MAINTAINABILITY</span>
-                    <span class="text-white/60 font-mono">${getPurityGrade(purityScore)}</span>
-                    <div class="w-16 h-[2px] bg-white/10 rounded-full overflow-hidden">
-                        <div class="h-full bg-white/60" style="width: ${purityScore}%"></div>
+            <!-- Island Map -->
+            <div class="relative min-h-[500px] bg-gradient-to-b from-blue-900/20 to-purple-900/20 rounded-3xl p-4 border border-white/10">
+                ${islands.map(island => `
+                    <div class="absolute transform -translate-x-1/2 -translate-y-1/2" 
+                         style="left: ${island.position.x}%; top: ${island.position.y}%;">
+                        <div data-island="${island.id}" 
+                             class="w-20 h-20 rounded-full flex items-center justify-center cursor-pointer transition-all
+                                    ${island.unlocked ? 'bg-emerald-500/20 border-2 border-emerald-400 shadow-lg shadow-emerald-500/30' : 'bg-white/5 border border-white/20 opacity-50'}
+                                    ${island.completed ? 'ring-4 ring-yellow-400/50' : ''}">
+                            <span class="text-2xl">${island.completed ? '✅' : '🏝️'}</span>
+                        </div>
+                        <p class="text-center text-xs mt-1 text-white/60">${island.name}</p>
                     </div>
+                `).join('')}
+                
+                <!-- Path lines (SVG) would go here -->
+            </div>
+            
+            <!-- Streak & Stats -->
+            <div class="mt-6 glass-panel p-4 rounded-2xl flex justify-around">
+                <div class="text-center">
+                    <span class="text-2xl">🔥</span>
+                    <p class="text-sm font-bold">${profile?.streak || 0}</p>
+                    <p class="text-xs text-white/40">Day Streak</p>
                 </div>
-            </footer>
+                <div class="text-center">
+                    <span class="text-2xl">🏆</span>
+                    <p class="text-sm font-bold">${profile?.totalCompletions || 0}</p>
+                    <p class="text-xs text-white/40">Challenges</p>
+                </div>
+            </div>
         </div>
     `;
-}
-
-function generateLabCards(allLabs, userLabs) {
-    return allLabs.map(lab => {
-        const progress = userLabs[lab.id] || { status: 'locked', bestTTG: null };
-        const isLocked = progress.status === 'locked';
-        const isCompleted = progress.status === 'completed';
-        const bestTTG = progress.bestTTG || lab.estimatedTime;
-        
-        return `
-            <div data-lab-id="${lab.id}" 
-                 class="glass-panel p-6 rounded-lg ${isLocked ? 'opacity-40 pointer-events-none' : 'cursor-pointer group hover:border-white/20'} transition-all duration-300">
-                <div class="flex justify-between items-start mb-8">
-                    <div class="flex gap-2">
-                        <span data-lang="${lab.language}" class="text-[10px] font-mono px-2 py-1 rounded-full bg-white/5 text-white/40">${lab.language.toUpperCase()}</span>
-                        ${isCompleted ? '<span class="text-[10px] text-emerald-400/60 px-2 py-1">✓</span>' : ''}
-                    </div>
-                    <span class="text-white/20 group-hover:text-white/50 transition-colors">→</span>
-                </div>
-                <h3 class="text-xl font-medium tracking-tight mb-2">${lab.title}</h3>
-                <p class="text-xs text-white/30 uppercase tracking-wider">
-                    ${lab.difficulty} • Best TTG: ${bestTTG}m
-                </p>
-                ${progress.attempts ? `<p class="text-[10px] text-white/20 mt-2">${progress.attempts} attempt${progress.attempts > 1 ? 's' : ''}</p>` : ''}
-            </div>
-        `;
-    }).join('');
-}
-
-function getPurityGrade(score) {
-    if (score >= 90) return 'A';
-    if (score >= 75) return 'B';
-    if (score >= 60) return 'C';
-    return 'D';
-}
-
-function getNextLevelMessage(currentLevel, completions) {
-    const thresholds = { 'JUNIOR': 1, 'SENIOR': 3, 'ARCHITECT': Infinity };
-    const next = { 'JUNIOR': 'SENIOR', 'SENIOR': 'ARCHITECT', 'ARCHITECT': 'MAX' };
-    const needed = thresholds[currentLevel] - completions;
-    if (needed <= 0) return `${next[currentLevel]} Unlocked!`;
-    return `${needed} to ${next[currentLevel]}`;
 }
