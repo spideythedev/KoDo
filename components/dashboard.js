@@ -1,12 +1,16 @@
 // components/dashboard.js
+import { getAllLabs } from '../curriculum.js';
+
 export function renderDashboard(user, profile) {
     const kLevel = profile?.kLevel || 'JUNIOR';
     const purityScore = profile?.purityScore || 100;
     const labs = profile?.labs || {};
+    const totalCompletions = profile?.totalCompletions || 0;
+    
+    const allLabs = getAllLabs();
     
     return `
         <div class="h-full flex flex-col p-8">
-            <!-- Header -->
             <header class="flex justify-between items-center pb-12 border-b border-subtle">
                 <div class="flex items-center gap-3">
                     <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
@@ -24,21 +28,19 @@ export function renderDashboard(user, profile) {
                 </div>
             </header>
 
-            <!-- Labs Grid -->
             <div class="flex-1 py-12 overflow-y-auto">
                 <div class="flex justify-between items-center mb-8">
                     <h2 class="text-xs font-bold uppercase tracking-[.25em] text-white/30">Active Forges</h2>
-                    <span class="text-[10px] text-white/20">kodo-559e9</span>
+                    <span class="text-[10px] text-white/20">${totalCompletions}/${allLabs.length} Completed</span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    ${generateLabCards(labs)}
+                    ${generateLabCards(allLabs, labs)}
                 </div>
             </div>
             
-            <!-- Footer: Purity Score -->
             <footer class="pt-8 border-t border-subtle flex justify-between items-center">
                 <div class="text-[10px] text-white/20">
-                    K. Level: ${kLevel} • ${kLevel === 'JUNIOR' ? '10 inquiries to Senior' : 'Architect Mode Unlocked'}
+                    K. Level: ${kLevel} • ${getNextLevelMessage(kLevel, totalCompletions)}
                 </div>
                 <div class="flex items-center gap-2 text-white/20 text-xs">
                     <span>MAINTAINABILITY</span>
@@ -52,30 +54,28 @@ export function renderDashboard(user, profile) {
     `;
 }
 
-function generateLabCards(labs) {
-    const labDefinitions = [
-        { id: 'js-lexical', name: 'JavaScript Lexical Scope', lang: 'JS', difficulty: 'Intermediate', baseTTG: 15 },
-        { id: 'discord-bot-core', name: 'Discord.js Gateway Intent', lang: 'Node', difficulty: 'Advanced', baseTTG: 30 },
-        { id: 'python-async', name: 'Python Asyncio Loop', lang: 'Python', difficulty: 'Expert', baseTTG: 25 },
-        { id: 'cpp-pointers', name: 'C++ Memory Layout', lang: 'C++', difficulty: 'Expert', baseTTG: 40 }
-    ];
-    
-    return labDefinitions.map(lab => {
-        const userProgress = labs[lab.id];
-        const isLocked = userProgress?.status === 'locked';
-        const bestTTG = userProgress?.ttg || lab.baseTTG;
+function generateLabCards(allLabs, userLabs) {
+    return allLabs.map(lab => {
+        const progress = userLabs[lab.id] || { status: 'locked', bestTTG: null };
+        const isLocked = progress.status === 'locked';
+        const isCompleted = progress.status === 'completed';
+        const bestTTG = progress.bestTTG || lab.estimatedTime;
         
         return `
-            <div data-lab-id="${lab.id}" class="glass-panel p-6 rounded-lg cursor-pointer group transition-all duration-300 hover:border-white/20 ${isLocked ? 'opacity-50' : ''}">
+            <div data-lab-id="${lab.id}" 
+                 class="glass-panel p-6 rounded-lg ${isLocked ? 'opacity-40 pointer-events-none' : 'cursor-pointer group hover:border-white/20'} transition-all duration-300">
                 <div class="flex justify-between items-start mb-8">
-                    <span data-lang="${lab.lang}" class="text-[10px] font-mono px-2 py-1 rounded-full bg-white/5 text-white/40">${lab.lang}</span>
+                    <div class="flex gap-2">
+                        <span data-lang="${lab.language}" class="text-[10px] font-mono px-2 py-1 rounded-full bg-white/5 text-white/40">${lab.language.toUpperCase()}</span>
+                        ${isCompleted ? '<span class="text-[10px] text-emerald-400/60 px-2 py-1">✓</span>' : ''}
+                    </div>
                     <span class="text-white/20 group-hover:text-white/50 transition-colors">→</span>
                 </div>
-                <h3 class="text-xl font-medium tracking-tight mb-2">${lab.name}</h3>
+                <h3 class="text-xl font-medium tracking-tight mb-2">${lab.title}</h3>
                 <p class="text-xs text-white/30 uppercase tracking-wider">
                     ${lab.difficulty} • Best TTG: ${bestTTG}m
-                    ${userProgress?.ttg ? '✓' : ''}
                 </p>
+                ${progress.attempts ? `<p class="text-[10px] text-white/20 mt-2">${progress.attempts} attempt${progress.attempts > 1 ? 's' : ''}</p>` : ''}
             </div>
         `;
     }).join('');
@@ -86,4 +86,12 @@ function getPurityGrade(score) {
     if (score >= 75) return 'B';
     if (score >= 60) return 'C';
     return 'D';
+}
+
+function getNextLevelMessage(currentLevel, completions) {
+    const thresholds = { 'JUNIOR': 1, 'SENIOR': 3, 'ARCHITECT': Infinity };
+    const next = { 'JUNIOR': 'SENIOR', 'SENIOR': 'ARCHITECT', 'ARCHITECT': 'MAX' };
+    const needed = thresholds[currentLevel] - completions;
+    if (needed <= 0) return `${next[currentLevel]} Unlocked!`;
+    return `${needed} to ${next[currentLevel]}`;
 }
