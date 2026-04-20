@@ -2,7 +2,19 @@
 let editorInstance = null;
 
 export async function initMonaco() {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+        // Check if Monaco already loaded
+        if (typeof monaco !== 'undefined' && editorInstance) {
+            resolve(editorInstance);
+            return;
+        }
+        
+        // Set timeout for CDN failure
+        const timeout = setTimeout(() => {
+            reject(new Error('Monaco CDN timeout'));
+            showFallbackEditor();
+        }, 8000);
+        
         require.config({ 
             paths: { 
                 vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.39.0/min/vs' 
@@ -10,7 +22,9 @@ export async function initMonaco() {
         });
         
         require(['vs/editor/editor.main'], function() {
-            // Register KoDo Dark Theme (Arceus-tier)
+            clearTimeout(timeout);
+            
+            // Register KoDo Dark Theme
             monaco.editor.defineTheme('kodo-dark', {
                 base: 'vs-dark',
                 inherit: true,
@@ -30,81 +44,47 @@ export async function initMonaco() {
                     'editorLineNumber.foreground': '#6A737D',
                     'editorLineNumber.activeForeground': '#E6EDF3',
                     'editor.selectionBackground': '#264F7840',
-                    'editorCursor.foreground': '#00A3FF',
-                    'editor.findMatchBackground': '#9E6A0340',
-                    'editorBracketMatch.background': '#00A3FF20',
-                    'editorBracketMatch.border': '#00A3FF80',
-                    'editorGutter.background': '#0A0A0A',
-                    'editorIndentGuide.background': '#FFFFFF08',
-                    'editorIndentGuide.activeBackground': '#FFFFFF20'
+                    'editorCursor.foreground': '#00A3FF'
                 }
             });
             
-            // Create editor instance
             const container = document.getElementById('monaco-container');
             if (!container) {
-                console.warn('Monaco container not found');
+                reject(new Error('Monaco container not found'));
                 return;
             }
             
             editorInstance = monaco.editor.create(container, {
-                value: '// KoDo Laboratory\n// Loading...',
+                value: '// Loading...',
                 language: 'javascript',
                 theme: 'kodo-dark',
                 fontSize: 13,
                 fontFamily: 'Geist Mono, Monaco, Consolas, monospace',
-                fontLigatures: true,
-                lineNumbers: 'on',
                 minimap: { enabled: false },
-                scrollBeyondLastLine: false,
                 automaticLayout: true,
                 padding: { top: 16, bottom: 16 },
-                renderLineHighlight: 'line',
-                cursorBlinking: 'smooth',
-                cursorSmoothCaretAnimation: 'on',
-                smoothScrolling: true,
-                bracketPairColorization: { enabled: true },
-                guides: { bracketPairs: true, indentation: false },
-                glyphMargin: false,
-                folding: true,
-                lineDecorationsWidth: 8,
-                lineNumbersMinChars: 4,
-                renderWhitespace: 'selection',
-                wordWrap: 'on'
+                bracketPairColorization: { enabled: true }
             });
             
-            // Expose to window for workspace access
+            // Enable TypeScript/JavaScript diagnostics
+            monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+                noSemanticValidation: false,
+                noSyntaxValidation: false
+            });
+            
+            monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+                target: monaco.languages.typescript.ScriptTarget.ES2020,
+                allowNonTsExtensions: true,
+                checkJs: true
+            });
+            
             window.kodoMonacoInstance = editorInstance;
-            
-            // Add custom keybinding for save
-            editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-                const status = document.getElementById('editor-status');
-                if (status) {
-                    status.textContent = '✓ Saved';
-                    status.classList.add('text-emerald-400');
-                    status.classList.remove('text-amber-400');
-                    
-                    // Flash the gutter
-                    const lineNumbers = document.querySelector('.margin-view-overlays');
-                    if (lineNumbers) {
-                        lineNumbers.style.transition = 'background 0.15s';
-                        lineNumbers.style.background = 'rgba(0, 163, 255, 0.05)';
-                        setTimeout(() => {
-                            lineNumbers.style.background = 'transparent';
-                        }, 150);
-                    }
-                    
-                    setTimeout(() => {
-                        status.textContent = '● Saved';
-                        status.classList.remove('text-emerald-400');
-                    }, 2000);
-                }
-            });
             
             // Initialize workspace if lab is active
             if (window.AppState?.currentLab) {
-                const { initializeWorkspace } = await import('./components/workspace.js');
-                initializeWorkspace(window.AppState.currentLab);
+                import('./components/workspace.js').then(ws => {
+                    ws.initializeWorkspace(window.AppState.currentLab);
+                });
             }
             
             resolve(editorInstance);
@@ -112,15 +92,21 @@ export async function initMonaco() {
     });
 }
 
-export function getEditorInstance() {
-    return editorInstance;
+function showFallbackEditor() {
+    const container = document.getElementById('monaco-container');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div class="h-full flex items-center justify-center p-8">
+            <div class="glass-panel p-6 text-center">
+                <p class="text-amber-400 mb-4">⚠ Editor failed to load</p>
+                <textarea id="fallback-editor" class="w-full h-64 bg-black border border-subtle text-white font-mono text-sm p-4 rounded">// Fallback editor - save your work locally</textarea>
+                <button onclick="location.reload()" class="mt-4 px-4 py-2 text-sm text-white/60 hover:text-white">Retry</button>
+            </div>
+        </div>
+    `;
 }
 
-export function updateEditorLanguage(language) {
-    if (!editorInstance) return;
-    
-    const model = editorInstance.getModel();
-    if (model) {
-        monaco.editor.setModelLanguage(model, language);
-    }
+export function getEditorInstance() {
+    return editorInstance;
 }
