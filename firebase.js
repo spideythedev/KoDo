@@ -2,9 +2,13 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { 
     getAuth, 
-    GithubAuthProvider,
+    GoogleAuthProvider,
     signInWithPopup,
-    signOut
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail,
+    signOut,
+    updateProfile
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { 
     getFirestore,
@@ -31,12 +35,24 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// GitHub Auth Provider
-const githubProvider = new GithubAuthProvider();
-githubProvider.addScope('repo'); // Request repo access for KoDo Vault commits
+// Google Auth Provider
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+    prompt: 'select_account'
+});
 
 // Export instances and utilities
-export { auth, db, githubProvider, signInWithPopup, signOut };
+export { 
+    auth, 
+    db, 
+    googleProvider, 
+    signInWithPopup, 
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail,
+    signOut,
+    updateProfile
+};
 export { collection, doc, setDoc, getDoc, updateDoc };
 
 // Optional: Analytics (only in production)
