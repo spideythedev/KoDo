@@ -3,39 +3,680 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KoDo — Learn to Code, Playfully</title>
+    <title>KoDo · Learn Programming</title>
+    <!-- Tailwind (lightweight utility framework) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Monaco Editor -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.39.0/min/vs/loader.js"></script>
     <style>
-        /* Custom responsive utilities */
-        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-        .safe-top { padding-top: env(safe-area-inset-top); }
-        
-        /* K. Koala animations */
-        @keyframes bounce {
-            0%,100%{ transform: translateY(0); }
-            50%{ transform: translateY(-5px); }
+        /* ===== KODO ARCEUS DESIGN SYSTEM ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000000;
+            color: #EDEDEF;
+            overscroll-behavior: none;
+            -webkit-font-smoothing: antialiased;
         }
-        .k-bounce { animation: bounce 0.5s ease infinite; }
+        .glass-panel {
+            background: rgba(10, 10, 12, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .border-subtle { border-color: rgba(255, 255, 255, 0.06); }
+        .safe-top { padding-top: env(safe-area-inset-top); }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
         
         /* Mobile tap highlight removal */
         * { -webkit-tap-highlight-color: transparent; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 0; }
+        
+        /* Animations */
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        
+        /* Monaco overrides */
+        .monaco-editor .margin { background: #0A0A0C !important; }
+        .monaco-editor { border-radius: 0 !important; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.39.0/min/vs/loader.js"></script>
 </head>
-<body class="antialiased bg-black text-white overflow-hidden">
-    <div id="app-root" class="h-screen w-screen"></div>
-    
-    <!-- Mascot container (fixed) -->
-    <div id="k-koala-container" class="fixed bottom-4 right-4 z-50 pointer-events-none">
-        <div id="k-bubble" class="glass-panel p-3 rounded-2xl mb-2 text-sm max-w-[200px] opacity-0 transition-opacity">
-            Hi! I'm K. Let's code!
-        </div>
-        <div class="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-emerald-500/20 rounded-full flex items-center justify-center pointer-events-auto cursor-pointer backdrop-blur border border-white/10 shadow-xl" id="k-mascot">
-            <span class="text-3xl">🐨</span>
-        </div>
-    </div>
+<body class="overflow-hidden">
 
-    <script type="module" src="./app.js"></script>
+<!-- Hidden SVG sprite for icons -->
+<svg style="display:none;">
+    <defs>
+        <symbol id="icon-google" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </symbol>
+        <symbol id="icon-email" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </symbol>
+        <symbol id="icon-lock" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </symbol>
+        <symbol id="icon-play" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M8 5v14l11-7z"/>
+        </symbol>
+        <symbol id="icon-hint" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </symbol>
+        <symbol id="icon-close" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </symbol>
+        <symbol id="icon-arrow-left" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </symbol>
+        <symbol id="icon-arrow-right" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+        </symbol>
+        <symbol id="icon-koala" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="28" fill="#4A5568" opacity="0.3"/>
+            <circle cx="22" cy="28" r="5" fill="#1A202C"/>
+            <circle cx="42" cy="28" r="5" fill="#1A202C"/>
+            <circle cx="22" cy="28" r="2" fill="white"/>
+            <circle cx="42" cy="28" r="2" fill="white"/>
+            <ellipse cx="32" cy="42" rx="8" ry="5" fill="#2D3748"/>
+            <path d="M14 16c-2-4-6-6-10-4" stroke="#718096" stroke-width="2" fill="none"/>
+            <path d="M50 16c2-4 6-6 10-4" stroke="#718096" stroke-width="2" fill="none"/>
+        </symbol>
+        <symbol id="icon-island" viewBox="0 0 48 48">
+            <path d="M24 40 L8 28 L24 16 L40 28 Z" fill="#2F855A" opacity="0.4"/>
+            <circle cx="24" cy="20" r="10" fill="#48BB78" opacity="0.6"/>
+        </symbol>
+    </defs>
+</svg>
+
+<!-- Main App Root -->
+<div id="app-root" class="h-screen w-screen"></div>
+
+<!-- K. Koala Mascot (fixed) -->
+<div id="k-mascot-container" class="fixed bottom-5 right-5 z-50 pointer-events-none">
+    <div id="k-bubble" class="glass-panel p-3 rounded-2xl mb-2 text-sm max-w-[220px] shadow-xl opacity-0 transition-opacity duration-300 text-white/90">
+        Let's start coding!
+    </div>
+    <div class="w-14 h-14 pointer-events-auto cursor-pointer animate-float" id="k-mascot">
+        <svg width="56" height="56" viewBox="0 0 64 64">
+            <use href="#icon-koala" width="64" height="64"/>
+        </svg>
+    </div>
+</div>
+
+<script type="module">
+    // ==================== FIREBASE CONFIG ====================
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { 
+        getAuth, 
+        GoogleAuthProvider, 
+        signInWithPopup,
+        signInWithEmailAndPassword,
+        createUserWithEmailAndPassword,
+        sendPasswordResetEmail,
+        signOut,
+        updateProfile,
+        onAuthStateChanged 
+    } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { 
+        getFirestore,
+        doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs
+    } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCGd7y12N9iaDmR912XefuUZQtIAPnmQZ8",
+        authDomain: "kodo-559e9.firebaseapp.com",
+        projectId: "kodo-559e9",
+        storageBucket: "kodo-559e9.firebasestorage.app",
+        messagingSenderId: "931573681729",
+        appId: "1:931573681729:web:064234b9b2b626493e00c0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    // ==================== CURRICULUM DATA ====================
+    const curriculum = {
+        tracks: [
+            { id: 'js-fundamentals', name: 'JavaScript Basics', icon: 'island', color: '#48BB78' }
+        ],
+        courses: {
+            'js-fundamentals': {
+                id: 'js-fundamentals',
+                title: 'JavaScript Fundamentals',
+                lessons: [
+                    {
+                        id: 'js-variables',
+                        title: 'Variables & Data Types',
+                        steps: [
+                            {
+                                type: 'text',
+                                title: 'What is a Variable?',
+                                content: `A variable is like a labeled box where you can store information. In JavaScript, you create a variable using <code>let</code>.`,
+                                example: `let message = "Hello";\nconsole.log(message);`
+                            },
+                            {
+                                type: 'challenge',
+                                title: 'Create Your First Variable',
+                                instructions: 'Create a variable named <code>myName</code> and assign your name to it. Then log it with <code>console.log(myName)</code>.',
+                                starterCode: '// Write your code here\n',
+                                testCases: [
+                                    { description: 'Variable myName exists', test: `return typeof myName !== 'undefined';` },
+                                    { description: 'myName is a string', test: `return typeof myName === 'string' && myName.length > 0;` }
+                                ],
+                                hints: ['Use let myName = "YourName";', 'Then console.log(myName);']
+                            }
+                        ]
+                    },
+                    {
+                        id: 'js-functions',
+                        title: 'Functions',
+                        steps: [
+                            {
+                                type: 'text',
+                                title: 'Functions are Recipes',
+                                content: `A function is a reusable block of code. You define it once and call it many times.`,
+                                example: `function greet(name) {\n  return "Hello, " + name;\n}\nconsole.log(greet("KoDo"));`
+                            },
+                            {
+                                type: 'challenge',
+                                title: 'Write a Greeting Function',
+                                instructions: 'Create a function <code>greet</code> that takes a <code>name</code> parameter and returns <code>"Hello, " + name</code>. Call it with "World".',
+                                starterCode: '// Define your function here\n',
+                                testCases: [
+                                    { description: 'greet function exists', test: `return typeof greet === 'function';` },
+                                    { description: 'greet("World") returns "Hello, World"', test: `return greet("World") === "Hello, World";` }
+                                ],
+                                hints: ['function greet(name) { return "Hello, " + name; }']
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    };
+
+    // ==================== STATE MANAGEMENT ====================
+    const AppState = new Proxy({
+        user: null,
+        userProfile: null,
+        route: 'loading', // 'auth', 'dashboard', 'lesson', 'workspace'
+        currentCourseId: null,
+        currentLessonIndex: 0,
+        currentStepIndex: 0,
+        authMode: 'login' // 'login' or 'register'
+    }, {
+        set(target, prop, value) {
+            target[prop] = value;
+            if (prop === 'route' || prop === 'user' || prop === 'authMode') render();
+            return true;
+        }
+    });
+
+    // ==================== UI RENDERER ====================
+    const root = document.getElementById('app-root');
+    
+    function render() {
+        const { user, route } = AppState;
+        if (!user) {
+            renderAuthScreen();
+            return;
+        }
+        
+        switch (route) {
+            case 'dashboard': renderDashboard(); break;
+            case 'lesson': renderLessonView(); break;
+            case 'workspace': renderWorkspace(); break;
+            default: renderDashboard();
+        }
+    }
+
+    // ==================== AUTH SCREEN ====================
+    function renderAuthScreen() {
+        const isLogin = AppState.authMode === 'login';
+        root.innerHTML = `
+            <div class="flex flex-col items-center justify-center min-h-screen p-6 safe-top safe-bottom">
+                <div class="w-full max-w-md">
+                    <div class="text-center mb-10">
+                        <div class="w-20 h-20 mx-auto mb-4">
+                            <svg viewBox="0 0 64 64"><use href="#icon-koala" width="64" height="64"/></svg>
+                        </div>
+                        <h1 class="text-5xl font-light tracking-tight text-white">KoDo</h1>
+                        <p class="text-sm uppercase tracking-[.3em] text-white/30 mt-2">The Forge</p>
+                    </div>
+                    
+                    <div class="glass-panel rounded-2xl p-6">
+                        <div class="flex mb-6 border-b border-subtle">
+                            <button class="auth-tab flex-1 pb-3 text-sm font-medium ${isLogin ? 'text-white border-b-2 border-blue-500' : 'text-white/40'}" data-mode="login">Sign In</button>
+                            <button class="auth-tab flex-1 pb-3 text-sm font-medium ${!isLogin ? 'text-white border-b-2 border-blue-500' : 'text-white/40'}" data-mode="register">Register</button>
+                        </div>
+                        
+                        <button id="google-signin" class="w-full glass-panel py-3 rounded-lg flex items-center justify-center gap-3 text-sm font-medium hover:bg-white/5 transition mb-6">
+                            <svg width="20" height="20"><use href="#icon-google"/></svg>
+                            Continue with Google
+                        </button>
+                        
+                        <div class="relative my-6">
+                            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-subtle"></div></div>
+                            <div class="relative flex justify-center"><span class="px-3 bg-black text-white/30 text-xs">or</span></div>
+                        </div>
+                        
+                        <form id="auth-form" class="space-y-4">
+                            ${!isLogin ? `
+                            <div>
+                                <label class="block text-xs text-white/40 mb-1 uppercase tracking-wide">Display Name</label>
+                                <input type="text" id="displayName" class="w-full bg-white/5 border border-subtle rounded-lg px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-blue-500/50" placeholder="John Doe">
+                            </div>` : ''}
+                            <div>
+                                <label class="block text-xs text-white/40 mb-1 uppercase tracking-wide">Email</label>
+                                <input type="email" id="email" required class="w-full bg-white/5 border border-subtle rounded-lg px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-blue-500/50" placeholder="you@example.com">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-white/40 mb-1 uppercase tracking-wide">Password</label>
+                                <input type="password" id="password" required minlength="6" class="w-full bg-white/5 border border-subtle rounded-lg px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-blue-500/50" placeholder="••••••••">
+                            </div>
+                            ${isLogin ? `
+                            <div class="text-right">
+                                <button type="button" id="forgot-password" class="text-xs text-white/40 hover:text-white/60">Forgot?</button>
+                            </div>` : ''}
+                            <div id="auth-error" class="text-xs text-red-400 min-h-[20px] hidden"></div>
+                            <button type="submit" class="w-full bg-white/5 border border-subtle hover:bg-white/10 py-3 rounded-lg text-sm font-medium transition">${isLogin ? 'Sign In' : 'Create Account'}</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        `;
+        attachAuthListeners();
+    }
+
+    function attachAuthListeners() {
+        document.querySelectorAll('.auth-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                AppState.authMode = btn.dataset.mode;
+            });
+        });
+        
+        document.getElementById('google-signin')?.addEventListener('click', async () => {
+            try {
+                await signInWithPopup(auth, googleProvider);
+            } catch(e) { showAuthError(e.code); }
+        });
+        
+        document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const displayName = document.getElementById('displayName')?.value;
+            
+            try {
+                if (AppState.authMode === 'register') {
+                    const cred = await createUserWithEmailAndPassword(auth, email, password);
+                    if (displayName) await updateProfile(cred.user, { displayName });
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+            } catch(e) { showAuthError(e.code); }
+        });
+        
+        document.getElementById('forgot-password')?.addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            if (!email) return showAuthError('Enter your email first');
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showAuthError('Reset email sent!', 'success');
+            } catch(e) { showAuthError(e.code); }
+        });
+    }
+
+    function showAuthError(msg, type='error') {
+        const el = document.getElementById('auth-error');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.remove('hidden', 'text-red-400', 'text-emerald-400');
+        el.classList.add(type === 'success' ? 'text-emerald-400' : 'text-red-400');
+    }
+
+    // ==================== DASHBOARD (Island Map) ====================
+    async function renderDashboard() {
+        const user = AppState.user;
+        // Fetch or create profile
+        const userRef = doc(db, 'users', user.uid);
+        let profile = (await getDoc(userRef)).data();
+        if (!profile) {
+            profile = { stones: 0, streak: 0, completedLessons: [], progress: {} };
+            await setDoc(userRef, profile);
+        }
+        AppState.userProfile = profile;
+        
+        const courses = curriculum.courses;
+        const firstCourse = courses['js-fundamentals'];
+        const lessons = firstCourse.lessons;
+        const completedCount = profile.completedLessons?.filter(id => lessons.some(l => l.id === id)).length || 0;
+        
+        root.innerHTML = `
+            <div class="h-full flex flex-col overflow-hidden">
+                <header class="px-5 py-4 flex justify-between items-center border-b border-subtle safe-top">
+                    <div>
+                        <h1 class="text-xl font-semibold">Welcome, ${user.displayName?.split(' ')[0] || 'Coder'}</h1>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs text-white/50">Forge Stones:</span>
+                            <span class="text-sm font-medium">${profile.stones || 0}</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" class="text-yellow-400"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>
+                        </div>
+                    </div>
+                    <button id="signout-btn" class="text-white/40 p-2">
+                        <svg width="24" height="24"><use href="#icon-close"/></svg>
+                    </button>
+                </header>
+                
+                <div class="flex-1 overflow-auto p-5">
+                    <div class="glass-panel rounded-3xl p-5 mb-6">
+                        <h2 class="text-lg font-medium mb-4 flex items-center gap-2">
+                            <svg width="24" height="24"><use href="#icon-island"/></svg>
+                            ${firstCourse.title}
+                        </h2>
+                        <div class="h-2 bg-white/10 rounded-full mb-2">
+                            <div class="h-full bg-emerald-500 rounded-full" style="width: ${(completedCount/lessons.length)*100}%"></div>
+                        </div>
+                        <p class="text-xs text-white/40">${completedCount}/${lessons.length} lessons completed</p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        ${lessons.map((lesson, idx) => {
+                            const isCompleted = profile.completedLessons?.includes(lesson.id);
+                            const isLocked = idx > 0 && !profile.completedLessons?.includes(lessons[idx-1].id);
+                            return `
+                                <div class="glass-panel rounded-xl p-4 flex items-center gap-4 ${isLocked ? 'opacity-40' : 'cursor-pointer hover:bg-white/5'}" data-lesson-id="${lesson.id}" data-lesson-index="${idx}">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center ${isCompleted ? 'bg-emerald-500/20 border border-emerald-400' : 'bg-white/5 border border-subtle'}">
+                                        ${isCompleted ? '<svg width="20" height="20"><use href="#icon-check"/></svg>' : `<span class="text-sm font-mono">${idx+1}</span>`}
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="font-medium">${lesson.title}</h3>
+                                        <p class="text-xs text-white/40">${lesson.steps.length} steps</p>
+                                    </div>
+                                    ${isLocked ? '<svg width="20" height="20" class="text-white/30"><use href="#icon-lock"/></svg>' : '<svg width="20" height="20" class="text-white/20"><use href="#icon-arrow-right"/></svg>'}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                
+                <!-- Bottom stats -->
+                <div class="p-5 border-t border-subtle safe-bottom">
+                    <div class="flex justify-around text-center">
+                        <div>
+                            <div class="text-2xl font-bold">${profile.streak || 0}</div>
+                            <div class="text-xs text-white/40 flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" class="text-orange-400"><path fill="currentColor" d="M12 2L2 9l10 7 10-7-10-7z"/></svg> Day Streak</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold">${completedCount}</div>
+                            <div class="text-xs text-white/40">Completed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.querySelectorAll('[data-lesson-id]').forEach(el => {
+            if (el.classList.contains('opacity-40')) return;
+            el.addEventListener('click', () => {
+                const lessonId = el.dataset.lessonId;
+                const lessonIndex = parseInt(el.dataset.lessonIndex);
+                AppState.currentCourseId = 'js-fundamentals';
+                AppState.currentLessonIndex = lessonIndex;
+                AppState.currentStepIndex = 0;
+                AppState.route = 'lesson';
+            });
+        });
+        
+        document.getElementById('signout-btn')?.addEventListener('click', async () => {
+            await signOut(auth);
+            AppState.user = null;
+        });
+    }
+
+    // ==================== LESSON VIEW (Step by Step) ====================
+    function renderLessonView() {
+        const course = curriculum.courses[AppState.currentCourseId];
+        const lesson = course.lessons[AppState.currentLessonIndex];
+        const step = lesson.steps[AppState.currentStepIndex];
+        
+        root.innerHTML = `
+            <div class="h-full flex flex-col overflow-hidden safe-top">
+                <header class="px-4 py-3 flex items-center gap-3 border-b border-subtle">
+                    <button id="back-btn" class="p-2 -ml-2 text-white/60"><svg width="24" height="24"><use href="#icon-arrow-left"/></svg></button>
+                    <div class="flex-1">
+                        <div class="text-xs text-white/40">${lesson.title}</div>
+                        <div class="text-sm font-medium">Step ${AppState.currentStepIndex+1}/${lesson.steps.length}</div>
+                    </div>
+                    <div class="w-8"></div>
+                </header>
+                
+                <div class="flex-1 overflow-auto p-5">
+                    ${step.type === 'text' ? `
+                        <div class="prose prose-invert max-w-none">
+                            <h2 class="text-xl font-semibold mb-4">${step.title}</h2>
+                            <div class="text-white/70 space-y-4 leading-relaxed">${step.content}</div>
+                            ${step.example ? `
+                                <div class="glass-panel p-4 rounded-xl mt-6">
+                                    <div class="text-xs text-white/40 mb-2">Example</div>
+                                    <pre class="text-emerald-400 text-sm font-mono whitespace-pre-wrap">${escapeHtml(step.example)}</pre>
+                                    <button class="run-example mt-3 text-xs text-blue-400 flex items-center gap-1"><svg width="16" height="16"><use href="#icon-play"/></svg> Run this code</button>
+                                    <div class="example-output mt-2 text-sm text-white/60"></div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : `
+                        <div>
+                            <h2 class="text-xl font-semibold mb-2">${step.title}</h2>
+                            <p class="text-white/60 mb-4">${step.instructions}</p>
+                            <div class="glass-panel rounded-xl overflow-hidden border border-subtle">
+                                <div id="mini-editor" style="height:200px;"></div>
+                            </div>
+                            <div class="flex gap-3 mt-4">
+                                <button id="run-challenge" class="flex-1 bg-blue-500/20 border border-blue-400 py-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                                    <svg width="16" height="16"><use href="#icon-play"/></svg> Run Tests
+                                </button>
+                                <button id="hint-btn" class="glass-panel px-4 py-3 rounded-lg"><svg width="20" height="20"><use href="#icon-hint"/></svg></button>
+                            </div>
+                            <div id="test-results" class="mt-4 space-y-2"></div>
+                        </div>
+                    `}
+                </div>
+                
+                <div class="p-4 border-t border-subtle flex justify-between safe-bottom">
+                    <button id="prev-step" class="glass-panel px-5 py-3 rounded-lg text-sm ${AppState.currentStepIndex === 0 ? 'opacity-30 pointer-events-none' : ''}">Previous</button>
+                    <button id="next-step" class="bg-white/5 border border-subtle px-5 py-3 rounded-lg text-sm font-medium">${AppState.currentStepIndex === lesson.steps.length-1 ? 'Complete' : 'Next'}</button>
+                </div>
+            </div>
+        `;
+        
+        if (step.type === 'challenge') {
+            // Initialize Monaco mini editor
+            setTimeout(() => {
+                require(['vs/editor/editor.main'], function() {
+                    const editor = monaco.editor.create(document.getElementById('mini-editor'), {
+                        value: step.starterCode,
+                        language: 'javascript',
+                        theme: 'vs-dark',
+                        minimap: { enabled: false },
+                        fontSize: 13,
+                        automaticLayout: true,
+                        padding: { top: 12, bottom: 12 }
+                    });
+                    
+                    document.getElementById('run-challenge').addEventListener('click', () => {
+                        const code = editor.getValue();
+                        runTestsForStep(step, code);
+                    });
+                    
+                    document.getElementById('hint-btn').addEventListener('click', () => {
+                        const hint = step.hints[0] || 'No hints available.';
+                        showKMessage(hint);
+                    });
+                });
+            }, 50);
+        } else {
+            // Example runner
+            document.querySelector('.run-example')?.addEventListener('click', async (e) => {
+                const code = step.example;
+                const output = await executeJavaScript(code);
+                e.target.nextElementSibling.textContent = output;
+            });
+        }
+        
+        document.getElementById('back-btn').addEventListener('click', () => {
+            AppState.route = 'dashboard';
+        });
+        
+        document.getElementById('prev-step')?.addEventListener('click', () => {
+            if (AppState.currentStepIndex > 0) {
+                AppState.currentStepIndex--;
+                renderLessonView();
+            }
+        });
+        
+        document.getElementById('next-step')?.addEventListener('click', async () => {
+            if (step.type === 'challenge') {
+                // Ensure tests passed before proceeding? For simplicity, allow.
+            }
+            if (AppState.currentStepIndex < lesson.steps.length - 1) {
+                AppState.currentStepIndex++;
+                renderLessonView();
+            } else {
+                // Complete lesson
+                const profile = AppState.userProfile;
+                if (!profile.completedLessons) profile.completedLessons = [];
+                if (!profile.completedLessons.includes(lesson.id)) {
+                    profile.completedLessons.push(lesson.id);
+                    profile.stones = (profile.stones || 0) + 10;
+                    await updateDoc(doc(db, 'users', AppState.user.uid), profile);
+                    AppState.userProfile = profile;
+                }
+                AppState.route = 'dashboard';
+            }
+        });
+    }
+
+    async function runTestsForStep(step, code) {
+        const resultsDiv = document.getElementById('test-results');
+        resultsDiv.innerHTML = '<div class="text-white/40 text-sm">Running tests...</div>';
+        
+        const results = [];
+        for (const tc of step.testCases) {
+            try {
+                const passed = await evaluateTestCase(code, tc.test);
+                results.push({ ...tc, passed });
+            } catch(e) {
+                results.push({ ...tc, passed: false, error: e.message });
+            }
+        }
+        
+        resultsDiv.innerHTML = results.map(r => `
+            <div class="flex items-start gap-2 p-2 rounded ${r.passed ? 'bg-emerald-500/10' : 'bg-red-500/10'}">
+                <svg width="16" height="16" class="${r.passed ? 'text-emerald-400' : 'text-red-400'} mt-0.5">
+                    <use href="${r.passed ? '#icon-check' : '#icon-close'}"/>
+                </svg>
+                <div><p class="text-sm ${r.passed ? 'text-white/70' : 'text-red-300'}">${r.description}</p>
+                ${r.error ? `<p class="text-xs text-red-400/70">${r.error}</p>` : ''}</div>
+            </div>
+        `).join('');
+        
+        const allPassed = results.every(r => r.passed);
+        if (allPassed) {
+            showKMessage('Great! All tests passed! 🎉', 'celebrate');
+        }
+    }
+
+    async function evaluateTestCase(code, testExpr) {
+        // Execute user code in worker, then run test expression
+        return new Promise((resolve, reject) => {
+            const worker = new Worker(URL.createObjectURL(new Blob([`
+                self.onmessage = function(e) {
+                    try {
+                        eval(e.data.code);
+                        const passed = eval(e.data.test);
+                        self.postMessage({ passed });
+                    } catch(err) {
+                        self.postMessage({ error: err.message });
+                    }
+                };
+            `], { type: 'application/javascript' })));
+            worker.onmessage = (e) => {
+                if (e.data.error) reject(new Error(e.data.error));
+                else resolve(e.data.passed);
+                worker.terminate();
+            };
+            worker.postMessage({ code, test: testExpr });
+        });
+    }
+
+    async function executeJavaScript(code) {
+        return new Promise((resolve) => {
+            const worker = new Worker(URL.createObjectURL(new Blob([`
+                self.onmessage = function(e) {
+                    const logs = [];
+                    const originalLog = console.log;
+                    console.log = (...args) => logs.push(args.join(' '));
+                    try {
+                        eval(e.data);
+                        console.log = originalLog;
+                        self.postMessage(logs.join('\\n'));
+                    } catch(err) {
+                        self.postMessage('Error: ' + err.message);
+                    }
+                };
+            `], { type: 'application/javascript' })));
+            worker.onmessage = (e) => { resolve(e.data); worker.terminate(); };
+            worker.postMessage(code);
+        });
+    }
+
+    function escapeHtml(text) {
+        return text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // K. Mascot messages
+    function showKMessage(text, emotion='happy') {
+        const bubble = document.getElementById('k-bubble');
+        bubble.textContent = text;
+        bubble.style.opacity = '1';
+        setTimeout(() => bubble.style.opacity = '0', 4000);
+    }
+
+    // ==================== BOOTSTRAP ====================
+    onAuthStateChanged(auth, (user) => {
+        AppState.user = user;
+        if (user) {
+            // Load profile and route to dashboard
+            getDoc(doc(db, 'users', user.uid)).then(snap => {
+                if (!snap.exists()) {
+                    setDoc(doc(db, 'users', user.uid), { stones: 0, streak: 0, completedLessons: [] });
+                }
+                AppState.route = 'dashboard';
+            });
+        } else {
+            AppState.route = 'auth';
+        }
+    });
+
+    // Initial render
+    render();
+</script>
 </body>
 </html>
